@@ -69,6 +69,9 @@
     <!-- GAME SCREEN -->
     <div id="screen-game" class="screen">
       <div class="game-container">
+        <!-- Mute Button -->
+        <button id="btnMute" class="btn-mute" onclick="toggleMute()">🔊</button>
+
         <!-- Scoreboard -->
         <div class="scoreboard">
           <div class="player-score" id="score-left">
@@ -144,6 +147,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

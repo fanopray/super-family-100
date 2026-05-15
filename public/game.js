@@ -43,11 +43,14 @@ function showNotification(message, type = 'info') {
 // ==========================================
 document.getElementById('btnSinglePlayer').addEventListener('click', () => {
   gameMode = 'single';
+  audio.init();
+  audio.startBGM();
   startSinglePlayer();
 });
 
 document.getElementById('btnMultiPlayer').addEventListener('click', () => {
   gameMode = 'multi';
+  audio.init();
   showScreen('lobby');
 });
 
@@ -151,6 +154,7 @@ function spSubmitAnswer(answer) {
     revealCard(matched, question.answers[matched].text, question.answers[matched].score);
     document.getElementById('points-left').textContent = spScore;
     showNotification(`✅ "${question.answers[matched].text}" - ${question.answers[matched].score} × ${multiplier} = ${earnedScore} poin!`, 'success');
+    audio.playCorrect();
 
     // Reset timer 30 detik setiap jawab benar
     clearInterval(spTimer);
@@ -165,6 +169,7 @@ function spSubmitAnswer(answer) {
   } else {
     spStrikes++;
     showStrikes(spStrikes);
+    audio.playStrike();
     showNotification(`❌ "${answer}" tidak ada!`, 'error');
     if (spStrikes >= spMaxStrikes) {
       clearInterval(spTimer);
@@ -189,6 +194,8 @@ function spRevealAll() {
 
 function spEndGame() {
   clearInterval(spTimer);
+  audio.stopBGM();
+  audio.playGameOver();
   document.getElementById('timerContainer').style.display = 'none';
   document.getElementById('answerContainer').style.display = 'none';
 
@@ -287,10 +294,12 @@ socket.on('buzzerReady', () => {
   document.getElementById('buzzerContainer').style.display = 'block';
   document.getElementById('answerContainer').style.display = 'none';
   document.getElementById('statusText').textContent = '🔔 Tekan BUZZER secepat mungkin!';
+  audio.startBGM();
 });
 
 socket.on('buzzerWon', ({ winnerId, winnerName }) => {
   document.getElementById('buzzerContainer').style.display = 'none';
+  audio.playBuzzer();
   if (winnerId === myId) {
     document.getElementById('answerContainer').style.display = 'flex';
     document.getElementById('answerInput').focus();
@@ -385,12 +394,14 @@ socket.on('stealFailed', ({ activePlayerName }) => {
 // --- ANSWERS ---
 socket.on('correctAnswer', ({ index, text, score, playerId }) => {
   revealCard(index, text, score);
+  audio.playCorrect();
   showNotification(`✅ "${text}" - ${score} poin!`, 'success');
   document.getElementById('answerInput').value = '';
 });
 
 socket.on('wrongAnswer', ({ strikes, playerId, answer }) => {
   showStrikes(strikes);
+  audio.playStrike();
   if (playerId === myId) {
     showNotification(`❌ "${answer}" salah!`, 'error');
   } else {
@@ -419,12 +430,14 @@ function startClientTimer(duration) {
     document.getElementById('timerFill').style.width = pct + '%';
     document.getElementById('timerFill').style.background =
       timeLeft <= 5 ? '#e53e3e' : timeLeft <= 10 ? '#ffd700' : '#48bb78';
+    if (timeLeft <= 5 && timeLeft > 0) audio.playCountdown();
   }, 1000);
 }
 
 // --- ROUND COMPLETE ---
 socket.on('roundComplete', ({ winnerId, winnerName, roundScore, multiplier, finalScore, scores, allAnswers }) => {
   clearInterval(clientTimer);
+  audio.playRoundWin();
   document.getElementById('answerContainer').style.display = 'none';
   document.getElementById('chooseContainer').style.display = 'none';
   document.getElementById('statusText').textContent = `🏆 ${winnerName} +${finalScore} poin! (${roundScore} × ${multiplier})`;
@@ -444,6 +457,8 @@ socket.on('roundComplete', ({ winnerId, winnerName, roundScore, multiplier, fina
 // --- GAME OVER ---
 socket.on('gameOver', ({ winner, winnerId, scores, players, isDraw, roomCode: rc }) => {
   clearInterval(clientTimer);
+  audio.stopBGM();
+  audio.playGameOver();
   roomCode = rc || roomCode;
   let html = '';
   if (isDraw) {
@@ -610,3 +625,10 @@ document.getElementById('roomCode').addEventListener('keypress', (e) => {
 document.getElementById('playerName').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('btnCreate').click();
 });
+
+
+// Mute toggle
+function toggleMute() {
+  const muted = audio.toggle();
+  document.getElementById('btnMute').textContent = muted ? '🔇' : '🔊';
+}
