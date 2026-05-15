@@ -74,8 +74,16 @@ function generateRoomCode() {
   return code;
 }
 
-function getRandomQuestions(count = 3) {
-  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+function getRandomQuestions(count = 3, usedIds = []) {
+  // Filter out already used questions
+  let available = questions.filter(q => !usedIds.includes(q.id));
+  
+  // If not enough available, reset (all questions have been used)
+  if (available.length < count) {
+    available = [...questions];
+  }
+  
+  const shuffled = available.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
@@ -83,13 +91,16 @@ function createRoom(hostPlayer) {
   let code = generateRoomCode();
   while (rooms[code]) code = generateRoomCode();
 
+  const selectedQuestions = getRandomQuestions(3, []);
+
   rooms[code] = {
     code,
     players: [hostPlayer],
     state: 'waiting',
     currentRound: 0,
     totalRounds: 3,
-    questions: getRandomQuestions(3),
+    questions: selectedQuestions,
+    usedQuestionIds: selectedQuestions.map(q => q.id),
     revealedAnswers: [],
     scores: {},
     strikes: 0,
@@ -621,7 +632,22 @@ io.on('connection', (socket) => {
       room.readyPlayers = [];
       room.scores[room.players[0].id] = 0;
       room.scores[room.players[1].id] = 0;
-      room.questions = getRandomQuestions(3);
+      
+      // Get new questions that haven't been used yet
+      const newQuestions = getRandomQuestions(3, room.usedQuestionIds);
+      room.questions = newQuestions;
+      // Track newly used questions
+      newQuestions.forEach(q => {
+        if (!room.usedQuestionIds.includes(q.id)) {
+          room.usedQuestionIds.push(q.id);
+        }
+      });
+      
+      // If all questions have been used, reset tracking
+      if (room.usedQuestionIds.length >= questions.length) {
+        room.usedQuestionIds = newQuestions.map(q => q.id);
+      }
+      
       room.currentRound = 0;
 
       io.to(code).emit('gameRestart', { scores: room.scores });

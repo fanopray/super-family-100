@@ -24,6 +24,7 @@ let spMaxStrikes = 3;
 let spRevealedAnswers = [];
 let spTimer = null;
 let spTimeLeft = 30;
+let spUsedQuestionIds = []; // Track used questions across games
 
 function showScreen(name) {
   Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -65,7 +66,21 @@ async function startSinglePlayer() {
   try {
     const res = await fetch('/api/questions');
     const allQuestions = await res.json();
-    spQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, spTotalRounds);
+    
+    // Filter out used questions
+    let available = allQuestions.filter(q => !spUsedQuestionIds.includes(q.id));
+    
+    // If not enough, reset
+    if (available.length < spTotalRounds) {
+      spUsedQuestionIds = [];
+      available = allQuestions;
+    }
+    
+    spQuestions = available.sort(() => Math.random() - 0.5).slice(0, spTotalRounds);
+    
+    // Track used
+    spQuestions.forEach(q => spUsedQuestionIds.push(q.id));
+    
     spCurrentRound = 0;
     spScore = 0;
 
