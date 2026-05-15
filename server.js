@@ -121,9 +121,69 @@ function matchAnswer(question, answer, revealedAnswers) {
   for (let i = 0; i < question.answers.length; i++) {
     if (revealedAnswers.includes(i)) continue;
     const ans = question.answers[i].text.toLowerCase();
+    // Exact/partial match
     if (ans.includes(normalized) || normalized.includes(ans)) return i;
+    // Fuzzy match - handle common Indonesian spelling variations
+    if (fuzzyMatch(normalized, ans)) return i;
   }
   return null;
+}
+
+function fuzzyMatch(input, target) {
+  // Normalize common variations
+  const normalize = (str) => {
+    return str
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      // Common Indonesian spelling variations
+      .replace(/oe/g, 'u')
+      .replace(/dj/g, 'j')
+      .replace(/tj/g, 'c')
+      .replace(/nj/g, 'ny')
+      .replace(/sj/g, 'sy')
+      .replace(/ch/g, 'k')
+      // Vowel variations
+      .replace(/e/g, 'e') // normalize e
+      .replace(/o/g, 'o');
+  };
+
+  const n1 = normalize(input);
+  const n2 = normalize(target);
+
+  if (n1 === n2) return true;
+  if (n1.includes(n2) || n2.includes(n1)) return true;
+
+  // Check similarity (Levenshtein-like for short words)
+  if (n1.length >= 3 && n2.length >= 3) {
+    const maxLen = Math.max(n1.length, n2.length);
+    const dist = levenshtein(n1, n2);
+    // Allow 1 char difference for words <= 5 chars, 2 for longer
+    const threshold = maxLen <= 5 ? 1 : 2;
+    if (dist <= threshold) return true;
+  }
+
+  return false;
+}
+
+function levenshtein(a, b) {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b[i - 1] === a[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
 }
 
 io.on('connection', (socket) => {
@@ -294,10 +354,14 @@ io.on('connection', (socket) => {
         // Lawan jawab (fase kedua)
         room.buzzerLoserAnswerIdx = matched;
 
-        // Bandingkan: index lebih kecil = jawaban lebih tinggi
-        if (room.buzzerLoserAnswerIdx < room.buzzerWinnerAnswerIdx) {
+        // Kalau buzzer winner gagal jawab (null), lawan otomatis pilih
+        if (room.buzzerWinnerAnswerIdx === null) {
+          goToChoose(code, room.buzzerLoser);
+        } else if (room.buzzerLoserAnswerIdx < room.buzzerWinnerAnswerIdx) {
+          // Lawan jawab lebih tinggi
           goToChoose(code, room.buzzerLoser);
         } else {
+          // Buzzer winner jawab lebih tinggi
           goToChoose(code, room.buzzerWinner);
         }
       }
@@ -306,6 +370,8 @@ io.on('connection', (socket) => {
       io.to(code).emit('buzzerWrongAnswer', { playerId: socket.id, answer });
 
       if (room.faceOffPhase === 'first') {
+        // Buzzer winner salah, giliran lawan
+        room.buzzerWinnerAnswerIdx = null; // mark as failed
         room.faceOffPhase = 'second';
         room.currentTurn = room.buzzerLoser;
         io.to(code).emit('faceOffSwitch', {
@@ -314,7 +380,8 @@ io.on('connection', (socket) => {
         });
         startFaceOffTimer(code);
       } else {
-        // Kedua salah, buzzer winner pilih
+        // Lawan juga salah (buzzer winner sudah salah sebelumnya)
+        // Buzzer winner tetap pilih karena menang buzzer
         goToChoose(code, room.buzzerWinner);
       }
     }
@@ -527,9 +594,41 @@ io.on('connection', (socket) => {
       winner: winner ? winner.name : null,
       winnerId: winner ? winner.id : null,
       scores: room.scores, players: room.players,
-      isDraw: !winner
+      isDraw: !winner,
+      roomCode: code
     });
   }
+
+  // Play Again in same room
+  socket.on('playAgain', (code) => {
+    const room = rooms[code];
+    if (!room || room.state !== 'gameOver') return;
+
+    // Track ready players
+    if (!room.readyPlayers) room.readyPlayers = [];
+    if (!room.readyPlayers.includes(socket.id)) {
+      room.readyPlayers.push(socket.id);
+    }
+
+    io.to(code).emit('playerReady', {
+      playerId: socket.id,
+      playerName: room.players.find(p => p.id === socket.id).name,
+      readyCount: room.readyPlayers.length
+    });
+
+    // Both players ready
+    if (room.readyPlayers.length >= 2) {
+      room.readyPlayers = [];
+      room.scores[room.players[0].id] = 0;
+      room.scores[room.players[1].id] = 0;
+      room.questions = getRandomQuestions(3);
+      room.currentRound = 0;
+
+      io.to(code).emit('gameRestart', { scores: room.scores });
+
+      setTimeout(() => startRound(code), 2000);
+    }
+  });
 
   socket.on('disconnect', () => {
     for (const code in rooms) {

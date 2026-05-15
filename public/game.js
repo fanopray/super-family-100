@@ -141,7 +141,7 @@ function spSubmitAnswer(answer) {
   for (let i = 0; i < question.answers.length; i++) {
     if (spRevealedAnswers.includes(i)) continue;
     const ans = question.answers[i].text.toLowerCase();
-    if (ans.includes(normalized) || normalized.includes(ans)) { matched = i; break; }
+    if (ans.includes(normalized) || normalized.includes(ans) || spFuzzyMatch(normalized, ans)) { matched = i; break; }
   }
 
   if (matched !== null) {
@@ -442,8 +442,9 @@ socket.on('roundComplete', ({ winnerId, winnerName, roundScore, multiplier, fina
 });
 
 // --- GAME OVER ---
-socket.on('gameOver', ({ winner, winnerId, scores, players, isDraw }) => {
+socket.on('gameOver', ({ winner, winnerId, scores, players, isDraw, roomCode: rc }) => {
   clearInterval(clientTimer);
+  roomCode = rc || roomCode;
   let html = '';
   if (isDraw) {
     html = `<p class="winner-name">🤝 SERI!</p>
@@ -456,7 +457,32 @@ socket.on('gameOver', ({ winner, winnerId, scores, players, isDraw }) => {
     document.getElementById('gameoverTitle').textContent = winnerId === myId ? '🎉 Kamu Menang! 🎉' : '😢 Kamu Kalah! 😢';
   }
   document.getElementById('gameoverResult').innerHTML = html;
+  
+  // Show play again button for multiplayer
+  if (gameMode === 'multi') {
+    document.getElementById('btnPlayAgain').textContent = '🔄 Main Lagi (Room Sama)';
+    document.getElementById('btnPlayAgain').onclick = () => {
+      socket.emit('playAgain', roomCode);
+      document.getElementById('btnPlayAgain').textContent = '⏳ Menunggu lawan...';
+      document.getElementById('btnPlayAgain').disabled = true;
+    };
+  }
   showScreen('gameover');
+});
+
+socket.on('playerReady', ({ playerName, readyCount }) => {
+  if (readyCount === 1) {
+    showNotification(`${playerName} siap main lagi!`, 'info');
+  }
+});
+
+socket.on('gameRestart', ({ scores }) => {
+  document.getElementById('btnPlayAgain').textContent = '🔄 Main Lagi (Room Sama)';
+  document.getElementById('btnPlayAgain').disabled = false;
+  document.getElementById('points-left').textContent = '0';
+  document.getElementById('points-right').textContent = '0';
+  showNotification('🎮 Game dimulai lagi!', 'success');
+  showScreen('game');
 });
 
 socket.on('playerDisconnected', ({ name }) => {
@@ -468,6 +494,32 @@ socket.on('playerDisconnected', ({ name }) => {
 // ==========================================
 // HELPERS
 // ==========================================
+function spFuzzyMatch(input, target) {
+  const normalize = (str) => str.replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  const n1 = normalize(input);
+  const n2 = normalize(target);
+  if (n1 === n2) return true;
+  if (n1.length >= 3 && n2.length >= 3) {
+    const maxLen = Math.max(n1.length, n2.length);
+    const dist = spLevenshtein(n1, n2);
+    const threshold = maxLen <= 5 ? 1 : 2;
+    if (dist <= threshold) return true;
+  }
+  return false;
+}
+
+function spLevenshtein(a, b) {
+  const m = [];
+  for (let i = 0; i <= b.length; i++) m[i] = [i];
+  for (let j = 0; j <= a.length; j++) m[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      m[i][j] = b[i-1] === a[j-1] ? m[i-1][j-1] : Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+    }
+  }
+  return m[b.length][a.length];
+}
+
 function generateAnswerBoard(count) {
   const board = document.getElementById('answerBoard');
   board.innerHTML = '';
@@ -531,7 +583,12 @@ document.getElementById('btnPass').addEventListener('click', () => {
   }
 });
 
-document.getElementById('btnPlayAgain').addEventListener('click', () => window.location.reload());
+document.getElementById('btnPlayAgain').addEventListener('click', () => {
+  if (gameMode === 'single') {
+    window.location.reload();
+  }
+  // Multiplayer handled by gameOver socket event
+});
 
 function submitAnswer() {
   const input = document.getElementById('answerInput');
