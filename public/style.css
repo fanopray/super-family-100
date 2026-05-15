@@ -482,6 +482,57 @@ input[type="text"]:focus {
   box-shadow: 0 5px 15px rgba(113, 128, 150, 0.4);
 }
 
+/* Choose Main/Lempar */
+.choose-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.btn-main {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: #fff;
+  flex: 1;
+  max-width: 200px;
+  font-size: 1.2rem;
+  padding: 18px;
+}
+
+.btn-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-lempar {
+  background: linear-gradient(135deg, #ed8936, #dd6b20);
+  color: #fff;
+  flex: 1;
+  max-width: 200px;
+  font-size: 1.2rem;
+  padding: 18px;
+}
+
+.btn-lempar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(237, 137, 54, 0.4);
+}
+
+/* Multiplier */
+.multiplier-display {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  padding: 6px 15px;
+  margin-bottom: 10px;
+  display: inline-block;
+  width: 100%;
+}
+
 /* GAME OVER */
 .gameover-container {
   text-align: center;

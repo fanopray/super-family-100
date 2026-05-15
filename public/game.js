@@ -1,6 +1,5 @@
 const socket = io();
 
-// DOM Elements
 const screens = {
   mode: document.getElementById('screen-mode'),
   lobby: document.getElementById('screen-lobby'),
@@ -9,12 +8,11 @@ const screens = {
   gameover: document.getElementById('screen-gameover')
 };
 
-// State
 let myId = null;
 let myName = '';
 let roomCode = '';
-let isMyTurn = false;
-let gameMode = null; // 'single' or 'multi'
+let gameMode = null;
+let clientTimer = null;
 
 // Single Player State
 let spQuestions = [];
@@ -27,13 +25,11 @@ let spRevealedAnswers = [];
 let spTimer = null;
 let spTimeLeft = 30;
 
-// Switch screen
 function showScreen(name) {
   Object.values(screens).forEach(s => s.classList.remove('active'));
   screens[name].classList.add('active');
 }
 
-// Notification
 function showNotification(message, type = 'info') {
   const notif = document.createElement('div');
   notif.className = `notification ${type}`;
@@ -60,25 +56,23 @@ document.getElementById('btnBackFromLobby').addEventListener('click', () => {
 });
 
 // ==========================================
-// SINGLE PLAYER MODE
+// SINGLE PLAYER
 // ==========================================
 async function startSinglePlayer() {
   try {
     const res = await fetch('/api/questions');
     const allQuestions = await res.json();
-    
-    // Shuffle and pick 5
     spQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, spTotalRounds);
     spCurrentRound = 0;
     spScore = 0;
 
-    // Setup game screen for single player
     document.getElementById('name-left').textContent = 'Kamu';
     document.getElementById('name-right').textContent = 'Target';
     document.getElementById('points-left').textContent = '0';
     document.getElementById('points-right').textContent = '100';
     document.getElementById('score-right').classList.remove('active-turn');
     document.getElementById('score-left').classList.add('active-turn');
+    document.getElementById('multiplierDisplay').style.display = 'none';
 
     showScreen('game');
     spStartRound();
@@ -88,10 +82,7 @@ async function startSinglePlayer() {
 }
 
 function spStartRound() {
-  if (spCurrentRound >= spTotalRounds) {
-    spEndGame();
-    return;
-  }
+  if (spCurrentRound >= spTotalRounds) { spEndGame(); return; }
 
   const question = spQuestions[spCurrentRound];
   spStrikes = 0;
@@ -102,29 +93,14 @@ function spStartRound() {
   document.getElementById('questionText').textContent = question.question;
   document.getElementById('strikesDisplay').innerHTML = '';
   document.getElementById('buzzerContainer').style.display = 'none';
+  document.getElementById('chooseContainer').style.display = 'none';
   document.getElementById('answerContainer').style.display = 'flex';
   document.getElementById('answerInput').value = '';
   document.getElementById('answerInput').focus();
   document.getElementById('statusText').textContent = '🎯 Tebak jawaban survei terpopuler!';
   document.getElementById('timerContainer').style.display = 'block';
-  document.getElementById('btnPass').textContent = 'Skip Ronde';
 
-  // Generate answer board
-  const board = document.getElementById('answerBoard');
-  board.innerHTML = '';
-  for (let i = 0; i < question.answers.length; i++) {
-    const card = document.createElement('div');
-    card.className = 'answer-card';
-    card.id = `answer-${i}`;
-    card.innerHTML = `
-      <span class="answer-number">${i + 1}</span>
-      <span class="answer-text">???</span>
-      <span class="answer-score"></span>
-    `;
-    board.appendChild(card);
-  }
-
-  // Start timer
+  generateAnswerBoard(question.answers.length);
   spStartTimer();
 }
 
@@ -132,105 +108,71 @@ function spStartTimer() {
   clearInterval(spTimer);
   spTimeLeft = 30;
   updateTimerDisplay();
-
   spTimer = setInterval(() => {
     spTimeLeft--;
     updateTimerDisplay();
-    if (spTimeLeft <= 0) {
-      clearInterval(spTimer);
-      spRoundTimeout();
-    }
+    if (spTimeLeft <= 0) { clearInterval(spTimer); spRoundTimeout(); }
   }, 1000);
 }
 
 function updateTimerDisplay() {
   document.getElementById('timerText').textContent = spTimeLeft;
-  const percent = (spTimeLeft / 30) * 100;
-  document.getElementById('timerFill').style.width = percent + '%';
-  
-  if (spTimeLeft <= 10) {
-    document.getElementById('timerFill').style.background = '#e53e3e';
-  } else if (spTimeLeft <= 20) {
-    document.getElementById('timerFill').style.background = '#ffd700';
-  } else {
-    document.getElementById('timerFill').style.background = '#48bb78';
-  }
+  const pct = (spTimeLeft / 30) * 100;
+  document.getElementById('timerFill').style.width = pct + '%';
+  document.getElementById('timerFill').style.background =
+    spTimeLeft <= 10 ? '#e53e3e' : spTimeLeft <= 20 ? '#ffd700' : '#48bb78';
 }
 
 function spRoundTimeout() {
   showNotification('⏰ Waktu habis!', 'error');
-  spRevealAllAnswers();
+  spRevealAll();
   spCurrentRound++;
   setTimeout(() => spStartRound(), 3000);
 }
 
 function spSubmitAnswer(answer) {
   const question = spQuestions[spCurrentRound];
-  const normalizedAnswer = answer.toLowerCase().trim();
-
+  const normalized = answer.toLowerCase().trim();
   let matched = null;
   for (let i = 0; i < question.answers.length; i++) {
     if (spRevealedAnswers.includes(i)) continue;
     const ans = question.answers[i].text.toLowerCase();
-    if (ans.includes(normalizedAnswer) || normalizedAnswer.includes(ans)) {
-      matched = i;
-      break;
-    }
+    if (ans.includes(normalized) || normalized.includes(ans)) { matched = i; break; }
   }
 
   if (matched !== null) {
-    // Benar!
     spRevealedAnswers.push(matched);
     spScore += question.answers[matched].score;
-
-    const card = document.getElementById(`answer-${matched}`);
-    card.classList.add('revealed');
-    card.querySelector('.answer-text').textContent = question.answers[matched].text;
-    card.querySelector('.answer-score').textContent = question.answers[matched].score;
-
+    revealCard(matched, question.answers[matched].text, question.answers[matched].score);
     document.getElementById('points-left').textContent = spScore;
     showNotification(`✅ "${question.answers[matched].text}" - ${question.answers[matched].score} poin!`, 'success');
-
-    // Cek semua terbuka
     if (spRevealedAnswers.length === question.answers.length) {
       clearInterval(spTimer);
-      showNotification('🎉 Semua jawaban terbuka! Sempurna!', 'success');
+      showNotification('🎉 Sempurna!', 'success');
       spCurrentRound++;
       setTimeout(() => spStartRound(), 2000);
     }
   } else {
-    // Salah
     spStrikes++;
-    const strikesDiv = document.getElementById('strikesDisplay');
-    strikesDiv.innerHTML = '';
-    for (let i = 0; i < spStrikes; i++) {
-      strikesDiv.innerHTML += '<span class="strike-x">✕</span>';
-    }
-    showNotification(`❌ "${answer}" tidak ada di papan!`, 'error');
-
+    showStrikes(spStrikes);
+    showNotification(`❌ "${answer}" tidak ada!`, 'error');
     if (spStrikes >= spMaxStrikes) {
       clearInterval(spTimer);
-      showNotification('💥 3 Strike! Ronde selesai!', 'error');
-      spRevealAllAnswers();
+      showNotification('💥 3 Strike!', 'error');
+      spRevealAll();
       spCurrentRound++;
       setTimeout(() => spStartRound(), 3000);
     }
   }
-
   document.getElementById('answerInput').value = '';
   document.getElementById('answerInput').focus();
 }
 
-function spRevealAllAnswers() {
+function spRevealAll() {
   const question = spQuestions[spCurrentRound];
   question.answers.forEach((ans, i) => {
-    const card = document.getElementById(`answer-${i}`);
-    if (card && !card.classList.contains('revealed')) {
-      setTimeout(() => {
-        card.classList.add('revealed');
-        card.querySelector('.answer-text').textContent = ans.text;
-        card.querySelector('.answer-score').textContent = ans.score;
-      }, (i + 1) * 200);
+    if (!spRevealedAnswers.includes(i)) {
+      setTimeout(() => revealCard(i, ans.text, ans.score), (i + 1) * 200);
     }
   });
 }
@@ -239,40 +181,24 @@ function spEndGame() {
   clearInterval(spTimer);
   document.getElementById('timerContainer').style.display = 'none';
   document.getElementById('answerContainer').style.display = 'none';
-
-  // Hitung max possible score
   let maxScore = 0;
-  spQuestions.forEach(q => {
-    q.answers.forEach(a => maxScore += a.score);
-  });
-
-  let grade = '';
-  const percent = (spScore / maxScore) * 100;
-  if (percent >= 80) grade = '🌟 LUAR BIASA!';
-  else if (percent >= 60) grade = '👏 HEBAT!';
-  else if (percent >= 40) grade = '👍 BAGUS!';
-  else if (percent >= 20) grade = '😊 LUMAYAN!';
-  else grade = '💪 COBA LAGI!';
-
+  spQuestions.forEach(q => q.answers.forEach(a => maxScore += a.score));
+  const pct = (spScore / maxScore) * 100;
+  let grade = pct >= 80 ? '🌟 LUAR BIASA!' : pct >= 60 ? '👏 HEBAT!' : pct >= 40 ? '👍 BAGUS!' : pct >= 20 ? '😊 LUMAYAN!' : '💪 COBA LAGI!';
   document.getElementById('gameoverTitle').textContent = '🎮 Single Player Selesai!';
   document.getElementById('gameoverResult').innerHTML = `
     <p class="winner-name">${grade}</p>
-    <p class="final-score">Skor kamu: ${spScore} / ${maxScore}</p>
-    <p class="final-score">${Math.round(percent)}% jawaban benar</p>
-    <p style="color:#888; margin-top:10px;">Ronde dimainkan: ${spTotalRounds}</p>
+    <p class="final-score">Skor: ${spScore} / ${maxScore} (${Math.round(pct)}%)</p>
   `;
   showScreen('gameover');
 }
 
 // ==========================================
-// MULTIPLAYER MODE
+// MULTIPLAYER
 // ==========================================
 document.getElementById('btnCreate').addEventListener('click', () => {
   const name = document.getElementById('playerName').value.trim();
-  if (!name) {
-    showNotification('Masukkan nama dulu!', 'error');
-    return;
-  }
+  if (!name) { showNotification('Masukkan nama!', 'error'); return; }
   myName = name;
   socket.emit('createRoom', name);
 });
@@ -280,253 +206,309 @@ document.getElementById('btnCreate').addEventListener('click', () => {
 document.getElementById('btnJoin').addEventListener('click', () => {
   const name = document.getElementById('playerName').value.trim();
   const code = document.getElementById('roomCode').value.trim().toUpperCase();
-  if (!name) {
-    showNotification('Masukkan nama dulu!', 'error');
-    return;
-  }
-  if (!code || code.length !== 4) {
-    showNotification('Masukkan kode room 4 karakter!', 'error');
-    return;
-  }
+  if (!name) { showNotification('Masukkan nama!', 'error'); return; }
+  if (!code || code.length !== 4) { showNotification('Kode room 4 karakter!', 'error'); return; }
   myName = name;
   socket.emit('joinRoom', { code, playerName: name });
 });
 
-// SOCKET EVENTS
-socket.on('connect', () => {
-  myId = socket.id;
-});
+socket.on('connect', () => { myId = socket.id; });
 
 socket.on('roomCreated', ({ code, player }) => {
-  roomCode = code;
-  myId = player.id;
+  roomCode = code; myId = player.id;
   document.getElementById('displayRoomCode').textContent = code;
   showScreen('waiting');
 });
 
 socket.on('roomJoined', ({ code, player, opponent }) => {
-  roomCode = code;
-  myId = player.id;
-  showNotification(`Bergabung dengan room ${code}!`, 'success');
-  setupMultiplayerScreen(player, opponent);
+  roomCode = code; myId = player.id;
+  setupMultiplayer(player, opponent);
   showScreen('game');
 });
 
 socket.on('opponentJoined', (opponent) => {
   showNotification(`${opponent.name} bergabung!`, 'success');
-  const me = { id: myId, name: myName };
-  setupMultiplayerScreen(me, opponent);
+  setupMultiplayer({ id: myId, name: myName }, opponent);
   showScreen('game');
 });
 
-socket.on('error', (msg) => {
-  showNotification(msg, 'error');
-});
+socket.on('error', (msg) => showNotification(msg, 'error'));
 
-function setupMultiplayerScreen(me, opponent) {
+function setupMultiplayer(me, opponent) {
   document.getElementById('name-left').textContent = me.name;
   document.getElementById('name-right').textContent = opponent.name;
   document.getElementById('points-left').textContent = '0';
   document.getElementById('points-right').textContent = '0';
-  document.getElementById('timerContainer').style.display = 'none';
-  document.getElementById('btnPass').textContent = 'Pass';
+  document.getElementById('timerContainer').style.display = 'block';
+  document.getElementById('multiplierDisplay').style.display = 'block';
 }
 
-// MULTIPLAYER GAME EVENTS
-socket.on('newRound', ({ round, totalRounds, question, answerCount, scores }) => {
+// --- ROUND START ---
+socket.on('newRound', ({ round, totalRounds, question, answerCount, scores, multiplier }) => {
   document.getElementById('roundDisplay').textContent = `Ronde ${round}/${totalRounds}`;
   document.getElementById('questionText').textContent = question;
   document.getElementById('strikesDisplay').innerHTML = '';
   document.getElementById('statusText').textContent = 'Bersiap...';
   document.getElementById('buzzerContainer').style.display = 'none';
   document.getElementById('answerContainer').style.display = 'none';
-
+  document.getElementById('chooseContainer').style.display = 'none';
+  document.getElementById('multiplierDisplay').textContent = `Poin: ${multiplier}x`;
   updateScores(scores);
-
-  const board = document.getElementById('answerBoard');
-  board.innerHTML = '';
-  for (let i = 0; i < answerCount; i++) {
-    const card = document.createElement('div');
-    card.className = 'answer-card';
-    card.id = `answer-${i}`;
-    card.innerHTML = `
-      <span class="answer-number">${i + 1}</span>
-      <span class="answer-text">???</span>
-      <span class="answer-score"></span>
-    `;
-    board.appendChild(card);
-  }
-
+  generateAnswerBoard(answerCount);
   document.getElementById('score-left').classList.remove('active-turn');
   document.getElementById('score-right').classList.remove('active-turn');
 });
 
+// --- BUZZER ---
 socket.on('buzzerReady', () => {
   document.getElementById('buzzerContainer').style.display = 'block';
+  document.getElementById('answerContainer').style.display = 'none';
   document.getElementById('statusText').textContent = '🔔 Tekan BUZZER secepat mungkin!';
-  isMyTurn = false;
 });
 
 socket.on('buzzerWon', ({ winnerId, winnerName }) => {
   document.getElementById('buzzerContainer').style.display = 'none';
-
   if (winnerId === myId) {
     document.getElementById('answerContainer').style.display = 'flex';
     document.getElementById('answerInput').focus();
-    document.getElementById('statusText').textContent = '🎯 Kamu menang buzzer! Silakan jawab!';
-    isMyTurn = true;
-    setActiveTurn(winnerId);
+    document.getElementById('statusText').textContent = '🎯 Kamu menang buzzer! Jawab dalam 15 detik!';
   } else {
-    document.getElementById('statusText').textContent = `🔔 ${winnerName} menang buzzer! Menunggu jawaban...`;
-    isMyTurn = false;
-    setActiveTurn(winnerId);
+    document.getElementById('answerContainer').style.display = 'none';
+    document.getElementById('statusText').textContent = `🔔 ${winnerName} menang buzzer!`;
+  }
+  setActiveTurn(winnerId);
+});
+
+// --- FACE-OFF ---
+socket.on('faceOffSwitch', ({ newPlayerId, newPlayerName }) => {
+  if (newPlayerId === myId) {
+    document.getElementById('answerContainer').style.display = 'flex';
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerInput').focus();
+    document.getElementById('statusText').textContent = '🎯 Giliran kamu! Jawab dalam 15 detik!';
+  } else {
+    document.getElementById('answerContainer').style.display = 'none';
+    document.getElementById('statusText').textContent = `Giliran ${newPlayerName} menjawab...`;
+  }
+  setActiveTurn(newPlayerId);
+});
+
+socket.on('buzzerWrongAnswer', ({ playerId, answer }) => {
+  if (playerId === myId) {
+    showNotification(`❌ "${answer}" salah!`, 'error');
+  } else {
+    showNotification(`❌ Lawan salah: "${answer}"`, 'info');
+  }
+  document.getElementById('answerInput').value = '';
+});
+
+// --- CHOOSE MAIN/LEMPAR ---
+socket.on('chooseMainLempar', ({ chooserId, chooserName }) => {
+  document.getElementById('answerContainer').style.display = 'none';
+  if (chooserId === myId) {
+    document.getElementById('chooseContainer').style.display = 'flex';
+    document.getElementById('statusText').textContent = '🤔 Pilih MAIN atau LEMPAR ke lawan?';
+  } else {
+    document.getElementById('chooseContainer').style.display = 'none';
+    document.getElementById('statusText').textContent = `${chooserName} sedang memilih main atau lempar...`;
   }
 });
 
-socket.on('correctAnswer', ({ index, text, score, revealedAnswers, roundScore, playerId }) => {
-  const card = document.getElementById(`answer-${index}`);
-  card.classList.add('revealed');
-  card.querySelector('.answer-text').textContent = text;
-  card.querySelector('.answer-score').textContent = score;
+document.getElementById('btnMain').addEventListener('click', () => {
+  socket.emit('chooseMainOrLempar', { code: roomCode, choice: 'main' });
+  document.getElementById('chooseContainer').style.display = 'none';
+});
 
+document.getElementById('btnLempar').addEventListener('click', () => {
+  socket.emit('chooseMainOrLempar', { code: roomCode, choice: 'lempar' });
+  document.getElementById('chooseContainer').style.display = 'none';
+});
+
+// --- PLAY PHASE ---
+socket.on('playPhaseStart', ({ activePlayerId, activePlayerName }) => {
+  document.getElementById('chooseContainer').style.display = 'none';
+  document.getElementById('strikesDisplay').innerHTML = '';
+  if (activePlayerId === myId) {
+    document.getElementById('answerContainer').style.display = 'flex';
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerInput').focus();
+    document.getElementById('statusText').textContent = '🎯 Tebak semua jawaban! 30 detik per jawaban.';
+  } else {
+    document.getElementById('answerContainer').style.display = 'none';
+    document.getElementById('statusText').textContent = `${activePlayerName} sedang bermain...`;
+  }
+  setActiveTurn(activePlayerId);
+});
+
+// --- STEAL PHASE ---
+socket.on('stealPhase', ({ stealPlayerId, stealPlayerName }) => {
+  document.getElementById('strikesDisplay').innerHTML = '';
+  if (stealPlayerId === myId) {
+    document.getElementById('answerContainer').style.display = 'flex';
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerInput').focus();
+    document.getElementById('statusText').textContent = '⚡ STEAL! 1 kesempatan, 15 detik!';
+  } else {
+    document.getElementById('answerContainer').style.display = 'none';
+    document.getElementById('statusText').textContent = `⚡ ${stealPlayerName} mencoba steal!`;
+  }
+  setActiveTurn(stealPlayerId);
+});
+
+socket.on('stealFailed', ({ activePlayerName }) => {
+  showNotification(`❌ Steal gagal! Poin ke ${activePlayerName}`, 'info');
+});
+
+// --- ANSWERS ---
+socket.on('correctAnswer', ({ index, text, score, playerId }) => {
+  revealCard(index, text, score);
   showNotification(`✅ "${text}" - ${score} poin!`, 'success');
   document.getElementById('answerInput').value = '';
 });
 
 socket.on('wrongAnswer', ({ strikes, playerId, answer }) => {
-  const strikesDiv = document.getElementById('strikesDisplay');
-  strikesDiv.innerHTML = '';
-  for (let i = 0; i < strikes; i++) {
-    strikesDiv.innerHTML += '<span class="strike-x">✕</span>';
-  }
-
+  showStrikes(strikes);
   if (playerId === myId) {
-    showNotification(`❌ "${answer}" tidak ada di papan!`, 'error');
+    showNotification(`❌ "${answer}" salah!`, 'error');
   } else {
-    showNotification(`❌ Lawan salah menjawab "${answer}"`, 'info');
+    showNotification(`❌ Lawan salah: "${answer}"`, 'info');
   }
   document.getElementById('answerInput').value = '';
 });
 
-socket.on('turnSwitch', ({ newPlayerId, newPlayerName, message }) => {
-  document.getElementById('strikesDisplay').innerHTML = '';
-
-  if (newPlayerId === myId) {
-    document.getElementById('answerContainer').style.display = 'flex';
-    document.getElementById('answerInput').focus();
-    document.getElementById('statusText').textContent = '🎯 Kesempatan STEAL! Jawab dengan benar!';
-    isMyTurn = true;
-  } else {
-    document.getElementById('answerContainer').style.display = 'none';
-    document.getElementById('statusText').textContent = `⚡ ${newPlayerName} mencoba steal!`;
-    isMyTurn = false;
-  }
-  setActiveTurn(newPlayerId);
+// --- TIMER ---
+socket.on('startTimer', ({ duration, phase }) => {
+  startClientTimer(duration);
 });
 
-socket.on('roundComplete', ({ winnerId, winnerName, roundScore, scores, allAnswers }) => {
+function startClientTimer(duration) {
+  clearInterval(clientTimer);
+  let timeLeft = duration;
+  document.getElementById('timerContainer').style.display = 'block';
+  document.getElementById('timerText').textContent = timeLeft;
+  document.getElementById('timerFill').style.width = '100%';
+
+  clientTimer = setInterval(() => {
+    timeLeft--;
+    if (timeLeft < 0) { clearInterval(clientTimer); return; }
+    document.getElementById('timerText').textContent = timeLeft;
+    const pct = (timeLeft / duration) * 100;
+    document.getElementById('timerFill').style.width = pct + '%';
+    document.getElementById('timerFill').style.background =
+      timeLeft <= 5 ? '#e53e3e' : timeLeft <= 10 ? '#ffd700' : '#48bb78';
+  }, 1000);
+}
+
+// --- ROUND COMPLETE ---
+socket.on('roundComplete', ({ winnerId, winnerName, roundScore, multiplier, finalScore, scores, allAnswers }) => {
+  clearInterval(clientTimer);
   document.getElementById('answerContainer').style.display = 'none';
-  document.getElementById('statusText').textContent = `🏆 ${winnerName} mendapat ${roundScore} poin ronde ini!`;
+  document.getElementById('chooseContainer').style.display = 'none';
+  document.getElementById('statusText').textContent = `🏆 ${winnerName} +${finalScore} poin! (${roundScore} × ${multiplier})`;
   updateScores(scores);
 
   if (allAnswers) {
     allAnswers.forEach((ans, i) => {
       const card = document.getElementById(`answer-${i}`);
       if (card && !card.classList.contains('revealed')) {
-        setTimeout(() => {
-          card.classList.add('revealed');
-          card.querySelector('.answer-text').textContent = ans.text;
-          card.querySelector('.answer-score').textContent = ans.score;
-        }, (i + 1) * 300);
+        setTimeout(() => revealCard(i, ans.text, ans.score), (i + 1) * 250);
       }
     });
   }
-
-  showNotification(`Ronde selesai! ${winnerName} +${roundScore}`, 'success');
+  showNotification(`${winnerName} +${finalScore} (${multiplier}x)`, 'success');
 });
 
+// --- GAME OVER ---
 socket.on('gameOver', ({ winner, winnerId, scores, players, isDraw }) => {
-  let resultHTML = '';
+  clearInterval(clientTimer);
+  let html = '';
   if (isDraw) {
-    resultHTML = `
-      <p class="winner-name">🤝 SERI!</p>
-      <p class="final-score">${players[0].name}: ${scores[players[0].id]} - ${players[1].name}: ${scores[players[1].id]}</p>
-    `;
+    html = `<p class="winner-name">🤝 SERI!</p>
+      <p class="final-score">${players[0].name}: ${scores[players[0].id]} - ${players[1].name}: ${scores[players[1].id]}</p>`;
   } else {
     const loser = players.find(p => p.id !== winnerId);
-    resultHTML = `
-      <p class="winner-name">🏆 ${winner} Menang!</p>
-      <p class="final-score">${winner}: ${scores[winnerId]} poin</p>
-      <p class="final-score">${loser.name}: ${scores[loser.id]} poin</p>
-    `;
-
-    if (winnerId === myId) {
-      document.getElementById('gameoverTitle').textContent = '🎉 Kamu Menang! 🎉';
-    } else {
-      document.getElementById('gameoverTitle').textContent = '😢 Kamu Kalah! 😢';
-    }
+    html = `<p class="winner-name">🏆 ${winner} Menang!</p>
+      <p class="final-score">${winner}: ${scores[winnerId]}</p>
+      <p class="final-score">${loser.name}: ${scores[loser.id]}</p>`;
+    document.getElementById('gameoverTitle').textContent = winnerId === myId ? '🎉 Kamu Menang! 🎉' : '😢 Kamu Kalah! 😢';
   }
-
-  document.getElementById('gameoverResult').innerHTML = resultHTML;
+  document.getElementById('gameoverResult').innerHTML = html;
   showScreen('gameover');
 });
 
 socket.on('playerDisconnected', ({ name }) => {
-  showNotification(`${name} terputus dari game!`, 'error');
+  clearInterval(clientTimer);
+  showNotification(`${name} terputus!`, 'error');
   setTimeout(() => showScreen('mode'), 2000);
 });
 
-// HELPER FUNCTIONS
+// ==========================================
+// HELPERS
+// ==========================================
+function generateAnswerBoard(count) {
+  const board = document.getElementById('answerBoard');
+  board.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement('div');
+    card.className = 'answer-card';
+    card.id = `answer-${i}`;
+    card.innerHTML = `<span class="answer-number">${i + 1}</span><span class="answer-text">???</span><span class="answer-score"></span>`;
+    board.appendChild(card);
+  }
+}
+
+function revealCard(index, text, score) {
+  const card = document.getElementById(`answer-${index}`);
+  if (card) {
+    card.classList.add('revealed');
+    card.querySelector('.answer-text').textContent = text;
+    card.querySelector('.answer-score').textContent = score;
+  }
+}
+
+function showStrikes(count) {
+  const div = document.getElementById('strikesDisplay');
+  div.innerHTML = '';
+  for (let i = 0; i < count; i++) div.innerHTML += '<span class="strike-x">✕</span>';
+}
+
 function updateScores(scores) {
   document.getElementById('points-left').textContent = scores[myId] || 0;
   for (const id in scores) {
-    if (id !== myId) {
-      document.getElementById('points-right').textContent = scores[id] || 0;
-    }
+    if (id !== myId) document.getElementById('points-right').textContent = scores[id] || 0;
   }
 }
 
 function setActiveTurn(playerId) {
   document.getElementById('score-left').classList.remove('active-turn');
   document.getElementById('score-right').classList.remove('active-turn');
-  if (playerId === myId) {
-    document.getElementById('score-left').classList.add('active-turn');
-  } else {
-    document.getElementById('score-right').classList.add('active-turn');
-  }
+  if (playerId === myId) document.getElementById('score-left').classList.add('active-turn');
+  else document.getElementById('score-right').classList.add('active-turn');
 }
 
+// ==========================================
 // INPUT EVENTS
+// ==========================================
 document.getElementById('btnBuzzer').addEventListener('click', () => {
-  socket.emit('buzzer', roomCode);
+  if (gameMode === 'multi') socket.emit('buzzer', roomCode);
 });
 
-document.getElementById('btnSubmitAnswer').addEventListener('click', () => {
-  submitAnswer();
-});
+document.getElementById('btnSubmitAnswer').addEventListener('click', () => submitAnswer());
 
 document.getElementById('answerInput').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    submitAnswer();
-  }
+  if (e.key === 'Enter') submitAnswer();
 });
 
 document.getElementById('btnPass').addEventListener('click', () => {
   if (gameMode === 'single') {
-    // Skip round in single player
     clearInterval(spTimer);
-    showNotification('⏭️ Ronde di-skip!', 'info');
-    spRevealAllAnswers();
+    spRevealAll();
     spCurrentRound++;
     setTimeout(() => spStartRound(), 2500);
-  } else {
-    socket.emit('pass', roomCode);
   }
 });
 
-document.getElementById('btnPlayAgain').addEventListener('click', () => {
-  window.location.reload();
-});
+document.getElementById('btnPlayAgain').addEventListener('click', () => window.location.reload());
 
 function submitAnswer() {
   const input = document.getElementById('answerInput');
@@ -536,15 +518,15 @@ function submitAnswer() {
   if (gameMode === 'single') {
     spSubmitAnswer(answer);
   } else {
+    // Determine which phase we're in based on server state
+    socket.emit('faceOffAnswer', { code: roomCode, answer });
     socket.emit('submitAnswer', { code: roomCode, answer });
   }
 }
 
-// Allow Enter on inputs
 document.getElementById('roomCode').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('btnJoin').click();
 });
-
 document.getElementById('playerName').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('btnCreate').click();
 });

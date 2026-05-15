@@ -11,241 +11,257 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// API: Get all questions
+// ==========================================
+// REST API
+// ==========================================
 app.get('/api/questions', (req, res) => {
   res.json(questions);
 });
 
-// API: Add new question
 app.post('/api/questions', (req, res) => {
   const { question, answers } = req.body;
   if (!question || !answers || answers.length === 0) {
     return res.status(400).json({ error: 'Pertanyaan dan jawaban harus diisi!' });
   }
-
   const newQuestion = {
     id: questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1,
-    question,
-    answers
+    question, answers
   };
   questions.push(newQuestion);
-
-  // Save to file
-  const fs = require('fs');
-  fs.writeFileSync(
-    path.join(__dirname, 'data', 'questions.json'),
-    JSON.stringify(questions, null, 2),
-    'utf-8'
-  );
-
+  saveQuestions();
   res.json({ success: true, question: newQuestion });
 });
 
-// API: Delete question
 app.delete('/api/questions/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const index = questions.findIndex(q => q.id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Pertanyaan tidak ditemukan!' });
-  }
-
+  if (index === -1) return res.status(404).json({ error: 'Tidak ditemukan!' });
   questions.splice(index, 1);
-
-  const fs = require('fs');
-  fs.writeFileSync(
-    path.join(__dirname, 'data', 'questions.json'),
-    JSON.stringify(questions, null, 2),
-    'utf-8'
-  );
-
+  saveQuestions();
   res.json({ success: true });
 });
 
-// API: Edit question
 app.put('/api/questions/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const index = questions.findIndex(q => q.id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Pertanyaan tidak ditemukan!' });
-  }
-
+  if (index === -1) return res.status(404).json({ error: 'Tidak ditemukan!' });
   const { question, answers } = req.body;
   if (!question || !answers || answers.length < 2) {
-    return res.status(400).json({ error: 'Pertanyaan dan minimal 2 jawaban harus diisi!' });
+    return res.status(400).json({ error: 'Minimal 2 jawaban!' });
   }
-
   questions[index] = { id, question, answers };
-
-  const fs = require('fs');
-  fs.writeFileSync(
-    path.join(__dirname, 'data', 'questions.json'),
-    JSON.stringify(questions, null, 2),
-    'utf-8'
-  );
-
+  saveQuestions();
   res.json({ success: true, question: questions[index] });
 });
 
-// Game rooms storage
+function saveQuestions() {
+  const fs = require('fs');
+  fs.writeFileSync(
+    path.join(__dirname, 'data', 'questions.json'),
+    JSON.stringify(questions, null, 2), 'utf-8'
+  );
+}
+
+// ==========================================
+// MULTIPLAYER GAME LOGIC
+// ==========================================
 const rooms = {};
 
 function generateRoomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
-  for (let i = 0; i < 4; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
   return code;
 }
 
-function getRandomQuestions(count = 5) {
+function getRandomQuestions(count = 3) {
   const shuffled = [...questions].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
 function createRoom(hostPlayer) {
   let code = generateRoomCode();
-  while (rooms[code]) {
-    code = generateRoomCode();
-  }
+  while (rooms[code]) code = generateRoomCode();
 
   rooms[code] = {
     code,
     players: [hostPlayer],
-    state: 'waiting', // waiting, buzzer, answering, roundEnd, gameOver
+    state: 'waiting',
     currentRound: 0,
-    totalRounds: 5,
-    questions: getRandomQuestions(5),
+    totalRounds: 3,
+    questions: getRandomQuestions(3),
     revealedAnswers: [],
     scores: {},
     strikes: 0,
-    maxStrikes: 3,
-    currentTurn: null, // player id yang lagi giliran
+    currentTurn: null,
     buzzerWinner: null,
-    roundScorePool: 0
+    buzzerLoser: null,
+    buzzerWinnerAnswerIdx: null,
+    buzzerLoserAnswerIdx: null,
+    faceOffPhase: 'first',
+    activePlayer: null,
+    passivePlayer: null,
+    roundScorePool: 0,
+    timer: null
   };
-
   rooms[code].scores[hostPlayer.id] = 0;
   return rooms[code];
 }
 
-io.on('connection', (socket) => {
-  console.log(`Player connected: ${socket.id}`);
+function getMultiplier(round) {
+  return round + 1; // Babak 1=1x, 2=2x, 3=3x
+}
 
-  // Buat room baru
+function clearTimer(room) {
+  if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+}
+
+function matchAnswer(question, answer, revealedAnswers) {
+  const normalized = answer.toLowerCase().trim();
+  for (let i = 0; i < question.answers.length; i++) {
+    if (revealedAnswers.includes(i)) continue;
+    const ans = question.answers[i].text.toLowerCase();
+    if (ans.includes(normalized) || normalized.includes(ans)) return i;
+  }
+  return null;
+}
+
+io.on('connection', (socket) => {
+  console.log(`Connected: ${socket.id}`);
+
   socket.on('createRoom', (playerName) => {
     const player = { id: socket.id, name: playerName };
     const room = createRoom(player);
     socket.join(room.code);
     socket.emit('roomCreated', { code: room.code, player });
-    console.log(`Room ${room.code} created by ${playerName}`);
   });
 
-  // Join room
   socket.on('joinRoom', ({ code, playerName }) => {
     const room = rooms[code];
-    if (!room) {
-      socket.emit('error', 'Room tidak ditemukan!');
-      return;
-    }
-    if (room.players.length >= 2) {
-      socket.emit('error', 'Room sudah penuh!');
-      return;
-    }
-    if (room.state !== 'waiting') {
-      socket.emit('error', 'Game sudah dimulai!');
-      return;
-    }
+    if (!room) return socket.emit('error', 'Room tidak ditemukan!');
+    if (room.players.length >= 2) return socket.emit('error', 'Room sudah penuh!');
+    if (room.state !== 'waiting') return socket.emit('error', 'Game sudah dimulai!');
 
     const player = { id: socket.id, name: playerName };
     room.players.push(player);
     room.scores[player.id] = 0;
     socket.join(code);
-
     socket.emit('roomJoined', { code, player, opponent: room.players[0] });
     socket.to(code).emit('opponentJoined', player);
-
-    // Auto start game ketika 2 pemain sudah join
     setTimeout(() => startGame(code), 2000);
   });
 
-  // Start game
   function startGame(code) {
     const room = rooms[code];
     if (!room || room.players.length < 2) return;
-
-    room.state = 'buzzer';
     room.currentRound = 0;
     startRound(code);
   }
 
+  // ==========================================
+  // START ROUND
+  // ==========================================
   function startRound(code) {
     const room = rooms[code];
-    if (room.currentRound >= room.totalRounds) {
-      endGame(code);
-      return;
-    }
+    if (room.currentRound >= room.totalRounds) { endGame(code); return; }
 
     room.state = 'buzzer';
     room.revealedAnswers = [];
     room.strikes = 0;
     room.buzzerWinner = null;
-    room.currentTurn = null;
+    room.buzzerLoser = null;
+    room.buzzerWinnerAnswerIdx = null;
+    room.buzzerLoserAnswerIdx = null;
+    room.faceOffPhase = 'first';
+    room.activePlayer = null;
+    room.passivePlayer = null;
     room.roundScorePool = 0;
+    clearTimer(room);
 
     const question = room.questions[room.currentRound];
+    const multiplier = getMultiplier(room.currentRound);
+
     io.to(code).emit('newRound', {
       round: room.currentRound + 1,
       totalRounds: room.totalRounds,
       question: question.question,
       answerCount: question.answers.length,
-      scores: room.scores
+      scores: room.scores,
+      multiplier
     });
 
-    // Buzzer phase
     setTimeout(() => {
-      io.to(code).emit('buzzerReady');
-    }, 2000);
+      if (room.state === 'buzzer') io.to(code).emit('buzzerReady');
+    }, 2500);
   }
 
-  // Buzzer ditekan
+  // ==========================================
+  // BUZZER - Rebutan tekan tombol
+  // ==========================================
   socket.on('buzzer', (code) => {
     const room = rooms[code];
-    if (!room || room.state !== 'buzzer') return;
-    if (room.buzzerWinner) return; // sudah ada yang pencet
+    if (!room || room.state !== 'buzzer' || room.buzzerWinner) return;
 
     room.buzzerWinner = socket.id;
+    room.buzzerLoser = room.players.find(p => p.id !== socket.id).id;
+    room.state = 'faceOff';
     room.currentTurn = socket.id;
-    room.state = 'answering';
+    room.faceOffPhase = 'first';
 
     io.to(code).emit('buzzerWon', {
       winnerId: socket.id,
       winnerName: room.players.find(p => p.id === socket.id).name
     });
+
+    // 15 detik untuk jawab
+    startFaceOffTimer(code);
   });
 
-  // Submit jawaban
-  socket.on('submitAnswer', ({ code, answer }) => {
+  function startFaceOffTimer(code) {
     const room = rooms[code];
-    if (!room || room.state !== 'answering') return;
-    if (room.currentTurn !== socket.id) return;
+    clearTimer(room);
+    io.to(code).emit('startTimer', { duration: 15, phase: 'faceOff' });
+    room.timer = setTimeout(() => faceOffTimeout(code), 15000);
+  }
+
+  function faceOffTimeout(code) {
+    const room = rooms[code];
+    if (!room || room.state !== 'faceOff') return;
+
+    io.to(code).emit('buzzerWrongAnswer', {
+      playerId: room.currentTurn,
+      answer: '(waktu habis)'
+    });
+
+    if (room.faceOffPhase === 'first') {
+      // Buzzer winner gagal, giliran lawan
+      room.faceOffPhase = 'second';
+      room.currentTurn = room.buzzerLoser;
+      io.to(code).emit('faceOffSwitch', {
+        newPlayerId: room.buzzerLoser,
+        newPlayerName: room.players.find(p => p.id === room.buzzerLoser).name
+      });
+      startFaceOffTimer(code);
+    } else {
+      // Kedua gagal, buzzer winner pilih main/lempar
+      clearTimer(room);
+      goToChoose(code, room.buzzerWinner);
+    }
+  }
+
+  // ==========================================
+  // FACE-OFF ANSWER
+  // ==========================================
+  socket.on('faceOffAnswer', ({ code, answer }) => {
+    const room = rooms[code];
+    if (!room || room.state !== 'faceOff' || room.currentTurn !== socket.id) return;
+    clearTimer(room);
 
     const question = room.questions[room.currentRound];
-    const normalizedAnswer = answer.toLowerCase().trim();
-
-    // Cek apakah jawaban cocok
-    let matched = null;
-    for (let i = 0; i < question.answers.length; i++) {
-      if (room.revealedAnswers.includes(i)) continue;
-      const ans = question.answers[i].text.toLowerCase();
-      if (ans.includes(normalizedAnswer) || normalizedAnswer.includes(ans)) {
-        matched = i;
-        break;
-      }
-    }
+    const matched = matchAnswer(question, answer, room.revealedAnswers);
 
     if (matched !== null) {
-      // Jawaban benar
+      // Benar!
       room.revealedAnswers.push(matched);
       room.roundScorePool += question.answers[matched].score;
 
@@ -258,114 +274,270 @@ io.on('connection', (socket) => {
         playerId: socket.id
       });
 
-      // Cek apakah semua jawaban sudah terbuka
-      if (room.revealedAnswers.length === question.answers.length) {
-        // Semua jawaban terbuka, skor masuk ke pemain yang lagi giliran
-        room.scores[room.currentTurn] += room.roundScorePool;
-        io.to(code).emit('roundComplete', {
-          winnerId: room.currentTurn,
-          winnerName: room.players.find(p => p.id === room.currentTurn).name,
-          roundScore: room.roundScorePool,
-          scores: room.scores
-        });
-        room.currentRound++;
-        setTimeout(() => startRound(code), 3000);
+      if (room.faceOffPhase === 'first') {
+        room.buzzerWinnerAnswerIdx = matched;
+
+        if (matched === 0) {
+          // Jawaban #1! Langsung pilih main/lempar
+          goToChoose(code, socket.id);
+        } else {
+          // Bukan #1, giliran lawan
+          room.faceOffPhase = 'second';
+          room.currentTurn = room.buzzerLoser;
+          io.to(code).emit('faceOffSwitch', {
+            newPlayerId: room.buzzerLoser,
+            newPlayerName: room.players.find(p => p.id === room.buzzerLoser).name
+          });
+          startFaceOffTimer(code);
+        }
+      } else {
+        // Lawan jawab (fase kedua)
+        room.buzzerLoserAnswerIdx = matched;
+
+        // Bandingkan: index lebih kecil = jawaban lebih tinggi
+        if (room.buzzerLoserAnswerIdx < room.buzzerWinnerAnswerIdx) {
+          goToChoose(code, room.buzzerLoser);
+        } else {
+          goToChoose(code, room.buzzerWinner);
+        }
       }
     } else {
-      // Jawaban salah - strike
-      room.strikes++;
-      io.to(code).emit('wrongAnswer', {
-        strikes: room.strikes,
-        playerId: socket.id,
-        answer: answer
-      });
+      // Salah
+      io.to(code).emit('buzzerWrongAnswer', { playerId: socket.id, answer });
 
-      if (room.strikes >= room.maxStrikes) {
-        // 3 strike - giliran pindah ke lawan atau ronde selesai
-        const otherPlayer = room.players.find(p => p.id !== room.currentTurn);
-
-        if (room.currentTurn === room.buzzerWinner) {
-          // Pindah ke lawan, lawan dapat 1 kesempatan
-          room.currentTurn = otherPlayer.id;
-          room.strikes = 0;
-          room.maxStrikes = 1; // lawan cuma dapat 1 kesempatan
-
-          io.to(code).emit('turnSwitch', {
-            newPlayerId: otherPlayer.id,
-            newPlayerName: otherPlayer.name,
-            message: 'Giliran pindah! Kamu punya 1 kesempatan untuk steal!'
-          });
-        } else {
-          // Lawan juga gagal, skor masuk ke buzzer winner
-          room.scores[room.buzzerWinner] += room.roundScorePool;
-          io.to(code).emit('roundComplete', {
-            winnerId: room.buzzerWinner,
-            winnerName: room.players.find(p => p.id === room.buzzerWinner).name,
-            roundScore: room.roundScorePool,
-            scores: room.scores
-          });
-          room.currentRound++;
-          room.maxStrikes = 3;
-          setTimeout(() => startRound(code), 3000);
-        }
+      if (room.faceOffPhase === 'first') {
+        room.faceOffPhase = 'second';
+        room.currentTurn = room.buzzerLoser;
+        io.to(code).emit('faceOffSwitch', {
+          newPlayerId: room.buzzerLoser,
+          newPlayerName: room.players.find(p => p.id === room.buzzerLoser).name
+        });
+        startFaceOffTimer(code);
+      } else {
+        // Kedua salah, buzzer winner pilih
+        goToChoose(code, room.buzzerWinner);
       }
     }
   });
 
-  // Pass giliran
-  socket.on('pass', (code) => {
+  // ==========================================
+  // CHOOSE MAIN / LEMPAR
+  // ==========================================
+  function goToChoose(code, chooserId) {
     const room = rooms[code];
-    if (!room || room.state !== 'answering') return;
-    if (room.currentTurn !== socket.id) return;
+    clearTimer(room);
+    room.state = 'chooseTurn';
+    room.currentTurn = chooserId;
 
-    // Skor masuk ke pemain yang pass
-    room.scores[room.currentTurn] += room.roundScorePool;
-    io.to(code).emit('roundComplete', {
-      winnerId: room.currentTurn,
-      winnerName: room.players.find(p => p.id === room.currentTurn).name,
-      roundScore: room.roundScorePool,
-      scores: room.scores,
-      allAnswers: room.questions[room.currentRound].answers
+    io.to(code).emit('chooseMainLempar', {
+      chooserId,
+      chooserName: room.players.find(p => p.id === chooserId).name
     });
-    room.currentRound++;
-    room.maxStrikes = 3;
-    setTimeout(() => startRound(code), 3000);
+  }
+
+  socket.on('chooseMainOrLempar', ({ code, choice }) => {
+    const room = rooms[code];
+    if (!room || room.state !== 'chooseTurn' || room.currentTurn !== socket.id) return;
+
+    const other = room.players.find(p => p.id !== socket.id);
+
+    if (choice === 'main') {
+      room.activePlayer = socket.id;
+      room.passivePlayer = other.id;
+    } else {
+      room.activePlayer = other.id;
+      room.passivePlayer = socket.id;
+    }
+
+    room.state = 'playing';
+    room.currentTurn = room.activePlayer;
+    room.strikes = 0;
+
+    const activeName = room.players.find(p => p.id === room.activePlayer).name;
+
+    io.to(code).emit('playPhaseStart', {
+      activePlayerId: room.activePlayer,
+      activePlayerName: activeName
+    });
+
+    startPlayTimer(code);
   });
 
+  // ==========================================
+  // PLAYING PHASE - 30 detik, 3 strike
+  // ==========================================
+  function startPlayTimer(code) {
+    const room = rooms[code];
+    clearTimer(room);
+    io.to(code).emit('startTimer', { duration: 30, phase: 'playing' });
+    room.timer = setTimeout(() => playTimeout(code), 30000);
+  }
+
+  function playTimeout(code) {
+    const room = rooms[code];
+    if (!room || room.state !== 'playing') return;
+
+    room.strikes++;
+    io.to(code).emit('wrongAnswer', {
+      strikes: room.strikes,
+      playerId: room.currentTurn,
+      answer: '(waktu habis)'
+    });
+
+    if (room.strikes >= 3) {
+      goToSteal(code);
+    } else {
+      startPlayTimer(code);
+    }
+  }
+
+  socket.on('submitAnswer', ({ code, answer }) => {
+    const room = rooms[code];
+    if (!room) return;
+    if (room.state !== 'playing' && room.state !== 'steal') return;
+    if (room.currentTurn !== socket.id) return;
+
+    const question = room.questions[room.currentRound];
+    const matched = matchAnswer(question, answer, room.revealedAnswers);
+
+    if (room.state === 'steal') {
+      clearTimer(room);
+      if (matched !== null) {
+        // Steal berhasil!
+        room.revealedAnswers.push(matched);
+        room.roundScorePool += question.answers[matched].score;
+        io.to(code).emit('correctAnswer', {
+          index: matched, text: question.answers[matched].text,
+          score: question.answers[matched].score,
+          revealedAnswers: room.revealedAnswers,
+          roundScore: room.roundScorePool, playerId: socket.id
+        });
+        finishRound(code, room.passivePlayer); // steal player = passivePlayer
+      } else {
+        // Steal gagal
+        io.to(code).emit('wrongAnswer', { strikes: 1, playerId: socket.id, answer });
+        io.to(code).emit('stealFailed', {
+          activePlayerName: room.players.find(p => p.id === room.activePlayer).name
+        });
+        finishRound(code, room.activePlayer);
+      }
+      return;
+    }
+
+    // Normal playing phase
+    if (matched !== null) {
+      room.revealedAnswers.push(matched);
+      room.roundScorePool += question.answers[matched].score;
+
+      io.to(code).emit('correctAnswer', {
+        index: matched, text: question.answers[matched].text,
+        score: question.answers[matched].score,
+        revealedAnswers: room.revealedAnswers,
+        roundScore: room.roundScorePool, playerId: socket.id
+      });
+
+      // Semua terbuka?
+      if (room.revealedAnswers.length === question.answers.length) {
+        clearTimer(room);
+        finishRound(code, room.activePlayer);
+      } else {
+        startPlayTimer(code); // Reset timer
+      }
+    } else {
+      room.strikes++;
+      io.to(code).emit('wrongAnswer', { strikes: room.strikes, playerId: socket.id, answer });
+
+      if (room.strikes >= 3) {
+        clearTimer(room);
+        goToSteal(code);
+      } else {
+        startPlayTimer(code); // Reset timer
+      }
+    }
+  });
+
+  // ==========================================
+  // STEAL PHASE
+  // ==========================================
+  function goToSteal(code) {
+    const room = rooms[code];
+    room.state = 'steal';
+    room.currentTurn = room.passivePlayer;
+
+    const stealName = room.players.find(p => p.id === room.passivePlayer).name;
+    io.to(code).emit('stealPhase', {
+      stealPlayerId: room.passivePlayer,
+      stealPlayerName: stealName
+    });
+
+    clearTimer(room);
+    io.to(code).emit('startTimer', { duration: 15, phase: 'steal' });
+    room.timer = setTimeout(() => {
+      // Steal timeout = gagal
+      io.to(code).emit('stealFailed', {
+        activePlayerName: room.players.find(p => p.id === room.activePlayer).name
+      });
+      finishRound(code, room.activePlayer);
+    }, 15000);
+  }
+
+  // ==========================================
+  // FINISH ROUND
+  // ==========================================
+  function finishRound(code, winnerId) {
+    const room = rooms[code];
+    if (!room) return;
+    clearTimer(room);
+
+    const multiplier = getMultiplier(room.currentRound);
+    const finalScore = room.roundScorePool * multiplier;
+    room.scores[winnerId] += finalScore;
+
+    const winnerName = room.players.find(p => p.id === winnerId).name;
+    const question = room.questions[room.currentRound];
+
+    io.to(code).emit('roundComplete', {
+      winnerId, winnerName,
+      roundScore: room.roundScorePool,
+      multiplier, finalScore,
+      scores: room.scores,
+      allAnswers: question.answers
+    });
+
+    room.currentRound++;
+    setTimeout(() => startRound(code), 4000);
+  }
+
+  // ==========================================
+  // END GAME
+  // ==========================================
   function endGame(code) {
     const room = rooms[code];
     if (!room) return;
-
+    clearTimer(room);
     room.state = 'gameOver';
-    const player1 = room.players[0];
-    const player2 = room.players[1];
-    const score1 = room.scores[player1.id];
-    const score2 = room.scores[player2.id];
 
+    const p1 = room.players[0], p2 = room.players[1];
+    const s1 = room.scores[p1.id], s2 = room.scores[p2.id];
     let winner = null;
-    if (score1 > score2) winner = player1;
-    else if (score2 > score1) winner = player2;
+    if (s1 > s2) winner = p1;
+    else if (s2 > s1) winner = p2;
 
     io.to(code).emit('gameOver', {
       winner: winner ? winner.name : null,
       winnerId: winner ? winner.id : null,
-      scores: room.scores,
-      players: room.players,
+      scores: room.scores, players: room.players,
       isDraw: !winner
     });
   }
 
-  // Disconnect
   socket.on('disconnect', () => {
-    console.log(`Player disconnected: ${socket.id}`);
-    // Cari room yang ada player ini
     for (const code in rooms) {
       const room = rooms[code];
-      const playerIndex = room.players.findIndex(p => p.id === socket.id);
-      if (playerIndex !== -1) {
-        io.to(code).emit('playerDisconnected', {
-          name: room.players[playerIndex].name
-        });
+      const idx = room.players.findIndex(p => p.id === socket.id);
+      if (idx !== -1) {
+        clearTimer(room);
+        io.to(code).emit('playerDisconnected', { name: room.players[idx].name });
         delete rooms[code];
         break;
       }
@@ -375,5 +547,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Super Family 100 server running on port ${PORT}`);
+  console.log(`Super Family 100 running on port ${PORT}`);
 });

@@ -97,13 +97,16 @@
         <div class="strikes-display" id="strikesDisplay">
         </div>
 
-        <!-- Timer (Single Player) -->
+        <!-- Timer -->
         <div class="timer-container" id="timerContainer" style="display:none;">
           <div class="timer-bar">
             <div class="timer-fill" id="timerFill"></div>
           </div>
           <span class="timer-text" id="timerText">30</span>
         </div>
+
+        <!-- Multiplier -->
+        <div class="multiplier-display" id="multiplierDisplay" style="display:none;">Poin: 1x</div>
 
         <!-- Game Status -->
         <div class="game-status" id="gameStatus">
@@ -115,11 +118,17 @@
           <button id="btnBuzzer" class="btn-buzzer">🔔 BUZZER!</button>
         </div>
 
+        <!-- Choose Main/Lempar -->
+        <div class="choose-container" id="chooseContainer" style="display:none;">
+          <button id="btnMain" class="btn btn-main">🎮 MAIN</button>
+          <button id="btnLempar" class="btn btn-lempar">🏐 LEMPAR</button>
+        </div>
+
         <!-- Answer Input -->
         <div class="answer-input-container" id="answerContainer" style="display:none;">
           <input type="text" id="answerInput" placeholder="Ketik jawabanmu...">
           <button id="btnSubmitAnswer" class="btn btn-primary">Jawab!</button>
-          <button id="btnPass" class="btn btn-pass">Pass</button>
+          <button id="btnPass" class="btn btn-pass">Skip</button>
         </div>
       </div>
     </div>
