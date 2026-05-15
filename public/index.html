@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Super Family 100</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- MODE SELECT SCREEN -->
+    <div id="screen-mode" class="screen active">
+      <div class="lobby-container">
+        <h1 class="game-title">⭐ SUPER FAMILY 100 ⭐</h1>
+        <p class="subtitle">Game Tebak Jawaban Survei Terpopuler!</p>
+        
+        <div class="mode-buttons">
+          <button id="btnSinglePlayer" class="btn btn-mode">
+            <span class="mode-icon">🎮</span>
+            <span class="mode-title">Single Player</span>
+            <span class="mode-desc">Main sendiri, kejar skor tertinggi!</span>
+          </button>
+          <button id="btnMultiPlayer" class="btn btn-mode">
+            <span class="mode-icon">👥</span>
+            <span class="mode-title">Multiplayer</span>
+            <span class="mode-desc">Lawan teman 1 vs 1 online!</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOBBY SCREEN (Multiplayer) -->
+    <div id="screen-lobby" class="screen">
+      <div class="lobby-container">
+        <h1 class="game-title">👥 Multiplayer</h1>
+        <p class="subtitle">Main bareng teman 1 vs 1!</p>
+        
+        <div class="input-group">
+          <input type="text" id="playerName" placeholder="Masukkan nama kamu" maxlength="15">
+        </div>
+
+        <div class="lobby-buttons">
+          <button id="btnCreate" class="btn btn-primary">Buat Room</button>
+          <div class="divider">atau</div>
+          <div class="join-group">
+            <input type="text" id="roomCode" placeholder="Kode Room" maxlength="4" style="text-transform: uppercase;">
+            <button id="btnJoin" class="btn btn-secondary">Join</button>
+          </div>
+        </div>
+        <button id="btnBackFromLobby" class="btn btn-back">← Kembali</button>
+      </div>
+    </div>
+
+    <!-- WAITING SCREEN -->
+    <div id="screen-waiting" class="screen">
+      <div class="waiting-container">
+        <h2>Menunggu Lawan...</h2>
+        <div class="room-code-display">
+          <p>Kode Room:</p>
+          <h1 id="displayRoomCode">----</h1>
+          <p class="hint">Bagikan kode ini ke temanmu!</p>
+        </div>
+        <div class="loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="game-container">
+        <!-- Scoreboard -->
+        <div class="scoreboard">
+          <div class="player-score" id="score-left">
+            <span class="player-name" id="name-left">Player 1</span>
+            <span class="score" id="points-left">0</span>
+          </div>
+          <div class="round-info">
+            <span id="roundDisplay">Ronde 1/5</span>
+          </div>
+          <div class="player-score" id="score-right">
+            <span class="player-name" id="name-right">Player 2</span>
+            <span class="score" id="points-right">0</span>
+          </div>
+        </div>
+
+        <!-- Question -->
+        <div class="question-box">
+          <p id="questionText">Pertanyaan akan muncul di sini...</p>
+        </div>
+
+        <!-- Answer Board -->
+        <div class="answer-board" id="answerBoard">
+        </div>
+
+        <!-- Strikes -->
+        <div class="strikes-display" id="strikesDisplay">
+        </div>
+
+        <!-- Timer (Single Player) -->
+        <div class="timer-container" id="timerContainer" style="display:none;">
+          <div class="timer-bar">
+            <div class="timer-fill" id="timerFill"></div>
+          </div>
+          <span class="timer-text" id="timerText">30</span>
+        </div>
+
+        <!-- Game Status -->
+        <div class="game-status" id="gameStatus">
+          <p id="statusText">Bersiap...</p>
+        </div>
+
+        <!-- Buzzer -->
+        <div class="buzzer-container" id="buzzerContainer" style="display:none;">
+          <button id="btnBuzzer" class="btn-buzzer">🔔 BUZZER!</button>
+        </div>
+
+        <!-- Answer Input -->
+        <div class="answer-input-container" id="answerContainer" style="display:none;">
+          <input type="text" id="answerInput" placeholder="Ketik jawabanmu...">
+          <button id="btnSubmitAnswer" class="btn btn-primary">Jawab!</button>
+          <button id="btnPass" class="btn btn-pass">Pass</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="screen-gameover" class="screen">
+      <div class="gameover-container">
+        <h1 id="gameoverTitle">🎉 Game Selesai! 🎉</h1>
+        <div id="gameoverResult"></div>
+        <button id="btnPlayAgain" class="btn btn-primary">Main Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

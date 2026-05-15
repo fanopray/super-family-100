@@ -1,0 +1,1208 @@
+[
+  {
+    "id": 1,
+    "question": "Sebutkan alasan orang terlambat ke kantor!",
+    "answers": [
+      { "text": "Macet", "score": 40 },
+      { "text": "Bangun kesiangan", "score": 25 },
+      { "text": "Hujan", "score": 15 },
+      { "text": "Motor/mobil mogok", "score": 10 },
+      { "text": "Anak rewel", "score": 7 },
+      { "text": "Lupa jalan", "score": 3 }
+    ]
+  },
+  {
+    "id": 2,
+    "question": "Sebutkan makanan khas Indonesia yang terkenal!",
+    "answers": [
+      { "text": "Nasi goreng", "score": 35 },
+      { "text": "Rendang", "score": 30 },
+      { "text": "Sate", "score": 15 },
+      { "text": "Gado-gado", "score": 10 },
+      { "text": "Bakso", "score": 7 },
+      { "text": "Soto", "score": 3 }
+    ]
+  },
+  {
+    "id": 3,
+    "question": "Sebutkan hewan peliharaan yang populer!",
+    "answers": [
+      { "text": "Kucing", "score": 35 },
+      { "text": "Anjing", "score": 25 },
+      { "text": "Ikan", "score": 15 },
+      { "text": "Burung", "score": 12 },
+      { "text": "Hamster", "score": 8 },
+      { "text": "Kelinci", "score": 5 }
+    ]
+  },
+  {
+    "id": 4,
+    "question": "Sebutkan alasan orang pergi ke mall!",
+    "answers": [
+      { "text": "Belanja", "score": 35 },
+      { "text": "Nonton bioskop", "score": 25 },
+      { "text": "Makan", "score": 20 },
+      { "text": "Jalan-jalan", "score": 10 },
+      { "text": "Ketemu teman", "score": 7 },
+      { "text": "Cari WiFi/AC", "score": 3 }
+    ]
+  },
+  {
+    "id": 5,
+    "question": "Sebutkan barang yang selalu dibawa saat bepergian!",
+    "answers": [
+      { "text": "HP/Handphone", "score": 35 },
+      { "text": "Dompet", "score": 30 },
+      { "text": "Kunci", "score": 15 },
+      { "text": "Charger", "score": 10 },
+      { "text": "Tisu", "score": 7 },
+      { "text": "Botol minum", "score": 3 }
+    ]
+  },
+  {
+    "id": 6,
+    "question": "Sebutkan acara TV yang ditonton keluarga!",
+    "answers": [
+      { "text": "Sinetron", "score": 30 },
+      { "text": "Berita", "score": 25 },
+      { "text": "Variety show", "score": 18 },
+      { "text": "Film", "score": 12 },
+      { "text": "Kartun", "score": 10 },
+      { "text": "Olahraga", "score": 5 }
+    ]
+  },
+  {
+    "id": 7,
+    "question": "Sebutkan minuman favorit orang Indonesia!",
+    "answers": [
+      { "text": "Teh", "score": 30 },
+      { "text": "Kopi", "score": 28 },
+      { "text": "Es jeruk", "score": 18 },
+      { "text": "Air putih", "score": 12 },
+      { "text": "Susu", "score": 8 },
+      { "text": "Jus buah", "score": 4 }
+    ]
+  },
+  {
+    "id": 8,
+    "question": "Sebutkan tempat wisata populer di Indonesia!",
+    "answers": [
+      { "text": "Bali", "score": 40 },
+      { "text": "Yogyakarta", "score": 20 },
+      { "text": "Raja Ampat", "score": 15 },
+      { "text": "Lombok", "score": 12 },
+      { "text": "Bandung", "score": 8 },
+      { "text": "Malang", "score": 5 }
+    ]
+  },
+  {
+    "id": 9,
+    "question": "Sebutkan pekerjaan yang dianggap bergengsi!",
+    "answers": [
+      { "text": "Dokter", "score": 35 },
+      { "text": "Pengacara", "score": 20 },
+      { "text": "Pilot", "score": 18 },
+      { "text": "PNS", "score": 12 },
+      { "text": "Insinyur", "score": 10 },
+      { "text": "Pengusaha", "score": 5 }
+    ]
+  },
+  {
+    "id": 10,
+    "question": "Sebutkan hal yang dilakukan saat bosan!",
+    "answers": [
+      { "text": "Main HP/sosmed", "score": 35 },
+      { "text": "Tidur", "score": 25 },
+      { "text": "Nonton TV/film", "score": 18 },
+      { "text": "Makan", "score": 10 },
+      { "text": "Jalan-jalan", "score": 8 },
+      { "text": "Main game", "score": 4 }
+    ]
+  },
+  {
+    "id": 11,
+    "question": "Sebutkan warna yang paling disukai orang!",
+    "answers": [
+      { "text": "Biru", "score": 30 },
+      { "text": "Merah", "score": 25 },
+      { "text": "Hitam", "score": 20 },
+      { "text": "Putih", "score": 12 },
+      { "text": "Hijau", "score": 8 },
+      { "text": "Pink", "score": 5 }
+    ]
+  },
+  {
+    "id": 12,
+    "question": "Sebutkan olahraga yang populer di Indonesia!",
+    "answers": [
+      { "text": "Sepak bola", "score": 35 },
+      { "text": "Badminton", "score": 30 },
+      { "text": "Voli", "score": 15 },
+      { "text": "Basket", "score": 10 },
+      { "text": "Renang", "score": 6 },
+      { "text": "Lari", "score": 4 }
+    ]
+  },
+  {
+    "id": 13,
+    "question": "Sebutkan alat transportasi umum!",
+    "answers": [
+      { "text": "Bus/TransJakarta", "score": 30 },
+      { "text": "Kereta/KRL", "score": 28 },
+      { "text": "Ojek online", "score": 20 },
+      { "text": "Angkot", "score": 12 },
+      { "text": "Taksi", "score": 7 },
+      { "text": "Becak", "score": 3 }
+    ]
+  },
+  {
+    "id": 14,
+    "question": "Sebutkan aplikasi yang paling sering dibuka!",
+    "answers": [
+      { "text": "WhatsApp", "score": 35 },
+      { "text": "Instagram", "score": 25 },
+      { "text": "TikTok", "score": 18 },
+      { "text": "YouTube", "score": 12 },
+      { "text": "Twitter/X", "score": 6 },
+      { "text": "Facebook", "score": 4 }
+    ]
+  },
+  {
+    "id": 15,
+    "question": "Sebutkan buah yang sering dimakan orang Indonesia!",
+    "answers": [
+      { "text": "Pisang", "score": 28 },
+      { "text": "Mangga", "score": 25 },
+      { "text": "Jeruk", "score": 18 },
+      { "text": "Semangka", "score": 13 },
+      { "text": "Apel", "score": 10 },
+      { "text": "Pepaya", "score": 6 }
+    ]
+  }
+,
+  {
+    "id": 16,
+    "question": "Sebutkan hal yang membuat orang bahagia!",
+    "answers": [
+      { "text": "Keluarga", "score": 30 },
+      { "text": "Uang/gaji", "score": 25 },
+      { "text": "Liburan", "score": 18 },
+      { "text": "Makan enak", "score": 12 },
+      { "text": "Kesehatan", "score": 10 },
+      { "text": "Teman", "score": 5 }
+    ]
+  },
+  {
+    "id": 17,
+    "question": "Sebutkan jajanan pasar yang populer!",
+    "answers": [
+      { "text": "Gorengan", "score": 30 },
+      { "text": "Klepon", "score": 22 },
+      { "text": "Risoles", "score": 18 },
+      { "text": "Lemper", "score": 13 },
+      { "text": "Onde-onde", "score": 10 },
+      { "text": "Serabi", "score": 7 }
+    ]
+  },
+  {
+    "id": 18,
+    "question": "Sebutkan alasan orang tidak bisa tidur!",
+    "answers": [
+      { "text": "Main HP", "score": 32 },
+      { "text": "Banyak pikiran", "score": 28 },
+      { "text": "Minum kopi", "score": 16 },
+      { "text": "Berisik", "score": 12 },
+      { "text": "Kepanasan", "score": 8 },
+      { "text": "Lapar", "score": 4 }
+    ]
+  },
+  {
+    "id": 19,
+    "question": "Sebutkan mata pelajaran di sekolah!",
+    "answers": [
+      { "text": "Matematika", "score": 30 },
+      { "text": "Bahasa Indonesia", "score": 22 },
+      { "text": "IPA", "score": 18 },
+      { "text": "Bahasa Inggris", "score": 14 },
+      { "text": "IPS", "score": 10 },
+      { "text": "Olahraga", "score": 6 }
+    ]
+  },
+  {
+    "id": 20,
+    "question": "Sebutkan hal yang dilakukan di hari Minggu!",
+    "answers": [
+      { "text": "Tidur/rebahan", "score": 30 },
+      { "text": "Jalan-jalan", "score": 25 },
+      { "text": "Bersih-bersih rumah", "score": 18 },
+      { "text": "Ibadah", "score": 12 },
+      { "text": "Masak", "score": 10 },
+      { "text": "Olahraga", "score": 5 }
+    ]
+  },
+  {
+    "id": 21,
+    "question": "Sebutkan merk HP yang terkenal!",
+    "answers": [
+      { "text": "Samsung", "score": 30 },
+      { "text": "iPhone/Apple", "score": 28 },
+      { "text": "Xiaomi", "score": 18 },
+      { "text": "Oppo", "score": 12 },
+      { "text": "Vivo", "score": 8 },
+      { "text": "Realme", "score": 4 }
+    ]
+  },
+  {
+    "id": 22,
+    "question": "Sebutkan hal yang bikin marah di jalan raya!",
+    "answers": [
+      { "text": "Macet", "score": 32 },
+      { "text": "Diserobot", "score": 25 },
+      { "text": "Klakson terus", "score": 16 },
+      { "text": "Motor lawan arah", "score": 12 },
+      { "text": "Lampu merah lama", "score": 10 },
+      { "text": "Jalan berlubang", "score": 5 }
+    ]
+  },
+  {
+    "id": 23,
+    "question": "Sebutkan makanan yang sering dipesan online!",
+    "answers": [
+      { "text": "Ayam geprek", "score": 28 },
+      { "text": "Nasi goreng", "score": 25 },
+      { "text": "Mie ayam/bakso", "score": 18 },
+      { "text": "Pizza", "score": 13 },
+      { "text": "Burger", "score": 10 },
+      { "text": "Sushi", "score": 6 }
+    ]
+  },
+  {
+    "id": 24,
+    "question": "Sebutkan barang elektronik di rumah!",
+    "answers": [
+      { "text": "TV", "score": 30 },
+      { "text": "Kulkas", "score": 25 },
+      { "text": "AC", "score": 18 },
+      { "text": "Mesin cuci", "score": 13 },
+      { "text": "Rice cooker", "score": 9 },
+      { "text": "Kipas angin", "score": 5 }
+    ]
+  },
+  {
+    "id": 25,
+    "question": "Sebutkan genre musik yang populer!",
+    "answers": [
+      { "text": "Pop", "score": 30 },
+      { "text": "Dangdut", "score": 25 },
+      { "text": "Rock", "score": 17 },
+      { "text": "R&B/Hip-hop", "score": 13 },
+      { "text": "Jazz", "score": 9 },
+      { "text": "Koplo", "score": 6 }
+    ]
+  },
+  {
+    "id": 26,
+    "question": "Sebutkan hal yang dilakukan saat hujan!",
+    "answers": [
+      { "text": "Tidur", "score": 32 },
+      { "text": "Makan mie instan", "score": 25 },
+      { "text": "Nonton film", "score": 18 },
+      { "text": "Minum teh/kopi", "score": 12 },
+      { "text": "Main HP", "score": 8 },
+      { "text": "Gorengan", "score": 5 }
+    ]
+  },
+  {
+    "id": 27,
+    "question": "Sebutkan alasan orang diet!",
+    "answers": [
+      { "text": "Pengen kurus", "score": 35 },
+      { "text": "Kesehatan", "score": 25 },
+      { "text": "Baju gak muat", "score": 16 },
+      { "text": "Disuruh dokter", "score": 12 },
+      { "text": "Mau nikah", "score": 8 },
+      { "text": "Ikut tren", "score": 4 }
+    ]
+  },
+  {
+    "id": 28,
+    "question": "Sebutkan superhero yang terkenal!",
+    "answers": [
+      { "text": "Spider-Man", "score": 28 },
+      { "text": "Batman", "score": 25 },
+      { "text": "Superman", "score": 20 },
+      { "text": "Iron Man", "score": 14 },
+      { "text": "Captain America", "score": 8 },
+      { "text": "Thor", "score": 5 }
+    ]
+  },
+  {
+    "id": 29,
+    "question": "Sebutkan hal yang sering dilupakan orang!",
+    "answers": [
+      { "text": "Kunci", "score": 28 },
+      { "text": "Nama orang", "score": 22 },
+      { "text": "Dompet", "score": 18 },
+      { "text": "Charger HP", "score": 14 },
+      { "text": "Ulang tahun", "score": 10 },
+      { "text": "Matiin kompor", "score": 8 }
+    ]
+  },
+  {
+    "id": 30,
+    "question": "Sebutkan hadiah yang sering diberikan!",
+    "answers": [
+      { "text": "Bunga", "score": 25 },
+      { "text": "Coklat", "score": 22 },
+      { "text": "Uang", "score": 20 },
+      { "text": "Baju", "score": 15 },
+      { "text": "Parfum", "score": 10 },
+      { "text": "Boneka", "score": 8 }
+    ]
+  }
+,
+  {
+    "id": 31,
+    "question": "Sebutkan alasan orang putus cinta!",
+    "answers": [
+      { "text": "Selingkuh", "score": 35 },
+      { "text": "Beda prinsip", "score": 22 },
+      { "text": "Jarak jauh", "score": 16 },
+      { "text": "Tidak cocok", "score": 12 },
+      { "text": "Dijodohkan", "score": 9 },
+      { "text": "Bosan", "score": 6 }
+    ]
+  },
+  {
+    "id": 32,
+    "question": "Sebutkan hal yang ada di kamar tidur!",
+    "answers": [
+      { "text": "Kasur", "score": 32 },
+      { "text": "Bantal", "score": 25 },
+      { "text": "Lemari", "score": 18 },
+      { "text": "Lampu", "score": 12 },
+      { "text": "Meja", "score": 8 },
+      { "text": "AC/kipas", "score": 5 }
+    ]
+  },
+  {
+    "id": 33,
+    "question": "Sebutkan negara yang ingin dikunjungi!",
+    "answers": [
+      { "text": "Jepang", "score": 30 },
+      { "text": "Korea Selatan", "score": 25 },
+      { "text": "Turki", "score": 16 },
+      { "text": "Inggris", "score": 12 },
+      { "text": "Australia", "score": 10 },
+      { "text": "Amerika", "score": 7 }
+    ]
+  },
+  {
+    "id": 34,
+    "question": "Sebutkan hal yang bikin orang menangis!",
+    "answers": [
+      { "text": "Putus cinta", "score": 28 },
+      { "text": "Kematian", "score": 25 },
+      { "text": "Film sedih", "score": 18 },
+      { "text": "Iris bawang", "score": 14 },
+      { "text": "Dimarahi", "score": 10 },
+      { "text": "Bahagia", "score": 5 }
+    ]
+  },
+  {
+    "id": 35,
+    "question": "Sebutkan topping pizza yang populer!",
+    "answers": [
+      { "text": "Keju", "score": 30 },
+      { "text": "Pepperoni", "score": 25 },
+      { "text": "Jamur", "score": 17 },
+      { "text": "Daging sapi", "score": 13 },
+      { "text": "Paprika", "score": 9 },
+      { "text": "Sosis", "score": 6 }
+    ]
+  },
+  {
+    "id": 36,
+    "question": "Sebutkan alasan orang ke rumah sakit!",
+    "answers": [
+      { "text": "Sakit/demam", "score": 30 },
+      { "text": "Kecelakaan", "score": 22 },
+      { "text": "Melahirkan", "score": 18 },
+      { "text": "Cek kesehatan", "score": 14 },
+      { "text": "Jenguk orang", "score": 10 },
+      { "text": "Operasi", "score": 6 }
+    ]
+  },
+  {
+    "id": 37,
+    "question": "Sebutkan hewan yang ditakuti orang!",
+    "answers": [
+      { "text": "Ular", "score": 30 },
+      { "text": "Kecoa", "score": 28 },
+      { "text": "Tikus", "score": 18 },
+      { "text": "Laba-laba", "score": 12 },
+      { "text": "Anjing", "score": 7 },
+      { "text": "Cicak", "score": 5 }
+    ]
+  },
+  {
+    "id": 38,
+    "question": "Sebutkan game HP yang populer!",
+    "answers": [
+      { "text": "Mobile Legends", "score": 30 },
+      { "text": "Free Fire", "score": 25 },
+      { "text": "PUBG Mobile", "score": 18 },
+      { "text": "Genshin Impact", "score": 12 },
+      { "text": "Candy Crush", "score": 9 },
+      { "text": "Clash of Clans", "score": 6 }
+    ]
+  },
+  {
+    "id": 39,
+    "question": "Sebutkan hal yang dilakukan sebelum tidur!",
+    "answers": [
+      { "text": "Main HP", "score": 35 },
+      { "text": "Sikat gigi", "score": 22 },
+      { "text": "Berdoa", "score": 16 },
+      { "text": "Nonton", "score": 12 },
+      { "text": "Baca buku", "score": 9 },
+      { "text": "Cuci muka", "score": 6 }
+    ]
+  },
+  {
+    "id": 40,
+    "question": "Sebutkan rasa es krim yang populer!",
+    "answers": [
+      { "text": "Coklat", "score": 30 },
+      { "text": "Vanilla", "score": 25 },
+      { "text": "Strawberry", "score": 20 },
+      { "text": "Matcha", "score": 12 },
+      { "text": "Durian", "score": 8 },
+      { "text": "Mangga", "score": 5 }
+    ]
+  },
+  {
+    "id": 41,
+    "question": "Sebutkan alasan orang resign dari kerja!",
+    "answers": [
+      { "text": "Gaji kecil", "score": 32 },
+      { "text": "Bos toxic", "score": 25 },
+      { "text": "Dapat tawaran lain", "score": 17 },
+      { "text": "Bosan", "score": 12 },
+      { "text": "Jarak jauh", "score": 9 },
+      { "text": "Mau usaha sendiri", "score": 5 }
+    ]
+  },
+  {
+    "id": 42,
+    "question": "Sebutkan barang yang dibeli saat diskon!",
+    "answers": [
+      { "text": "Baju", "score": 30 },
+      { "text": "Sepatu", "score": 22 },
+      { "text": "Skincare", "score": 18 },
+      { "text": "Elektronik", "score": 14 },
+      { "text": "Makanan", "score": 10 },
+      { "text": "Tas", "score": 6 }
+    ]
+  },
+  {
+    "id": 43,
+    "question": "Sebutkan hal yang ada di dapur!",
+    "answers": [
+      { "text": "Kompor", "score": 30 },
+      { "text": "Panci/wajan", "score": 22 },
+      { "text": "Kulkas", "score": 18 },
+      { "text": "Piring", "score": 14 },
+      { "text": "Rice cooker", "score": 10 },
+      { "text": "Pisau", "score": 6 }
+    ]
+  },
+  {
+    "id": 44,
+    "question": "Sebutkan platform streaming yang populer!",
+    "answers": [
+      { "text": "Netflix", "score": 32 },
+      { "text": "YouTube", "score": 28 },
+      { "text": "Disney+", "score": 16 },
+      { "text": "Spotify", "score": 12 },
+      { "text": "Vidio", "score": 7 },
+      { "text": "HBO", "score": 5 }
+    ]
+  },
+  {
+    "id": 45,
+    "question": "Sebutkan hal yang bikin orang kesal!",
+    "answers": [
+      { "text": "Dibohongi", "score": 28 },
+      { "text": "Difitnah", "score": 22 },
+      { "text": "WiFi lemot", "score": 18 },
+      { "text": "Antri lama", "score": 14 },
+      { "text": "Dicuekin", "score": 12 },
+      { "text": "Hujan tiba-tiba", "score": 6 }
+    ]
+  }
+,
+  {
+    "id": 46,
+    "question": "Sebutkan jenis kue ulang tahun yang populer!",
+    "answers": [
+      { "text": "Black forest", "score": 30 },
+      { "text": "Red velvet", "score": 25 },
+      { "text": "Tiramisu", "score": 18 },
+      { "text": "Cheese cake", "score": 13 },
+      { "text": "Brownies", "score": 9 },
+      { "text": "Tart buah", "score": 5 }
+    ]
+  },
+  {
+    "id": 47,
+    "question": "Sebutkan hal yang dilakukan saat liburan sekolah!",
+    "answers": [
+      { "text": "Jalan-jalan", "score": 30 },
+      { "text": "Main game", "score": 25 },
+      { "text": "Tidur seharian", "score": 18 },
+      { "text": "Pulang kampung", "score": 12 },
+      { "text": "Les/kursus", "score": 9 },
+      { "text": "Nonton", "score": 6 }
+    ]
+  },
+  {
+    "id": 48,
+    "question": "Sebutkan merk mobil yang terkenal!",
+    "answers": [
+      { "text": "Toyota", "score": 32 },
+      { "text": "Honda", "score": 25 },
+      { "text": "BMW", "score": 16 },
+      { "text": "Mercedes-Benz", "score": 12 },
+      { "text": "Mitsubishi", "score": 9 },
+      { "text": "Suzuki", "score": 6 }
+    ]
+  },
+  {
+    "id": 49,
+    "question": "Sebutkan hal yang bikin malu!",
+    "answers": [
+      { "text": "Jatuh di depan umum", "score": 30 },
+      { "text": "Salah sebut nama", "score": 22 },
+      { "text": "Kentut di publik", "score": 18 },
+      { "text": "Baju terbalik", "score": 13 },
+      { "text": "Ketahuan bohong", "score": 10 },
+      { "text": "Salah kirim chat", "score": 7 }
+    ]
+  },
+  {
+    "id": 50,
+    "question": "Sebutkan lauk yang sering dimakan dengan nasi!",
+    "answers": [
+      { "text": "Ayam goreng", "score": 30 },
+      { "text": "Telur", "score": 25 },
+      { "text": "Tempe", "score": 18 },
+      { "text": "Ikan", "score": 13 },
+      { "text": "Tahu", "score": 9 },
+      { "text": "Sambal", "score": 5 }
+    ]
+  },
+  {
+    "id": 51,
+    "question": "Sebutkan hal yang dicari di Google!",
+    "answers": [
+      { "text": "Berita", "score": 25 },
+      { "text": "Resep masakan", "score": 22 },
+      { "text": "Tugas sekolah", "score": 18 },
+      { "text": "Arah jalan", "score": 15 },
+      { "text": "Film/drama", "score": 12 },
+      { "text": "Lowongan kerja", "score": 8 }
+    ]
+  },
+  {
+    "id": 52,
+    "question": "Sebutkan alasan orang foto selfie!",
+    "answers": [
+      { "text": "Upload sosmed", "score": 30 },
+      { "text": "Kenang-kenangan", "score": 25 },
+      { "text": "Iseng/bosan", "score": 18 },
+      { "text": "Cek penampilan", "score": 13 },
+      { "text": "Kirim ke pacar", "score": 9 },
+      { "text": "Ganti foto profil", "score": 5 }
+    ]
+  },
+  {
+    "id": 53,
+    "question": "Sebutkan tokoh kartun yang terkenal!",
+    "answers": [
+      { "text": "Doraemon", "score": 28 },
+      { "text": "SpongeBob", "score": 25 },
+      { "text": "Naruto", "score": 18 },
+      { "text": "Mickey Mouse", "score": 13 },
+      { "text": "Upin Ipin", "score": 10 },
+      { "text": "Sinchan", "score": 6 }
+    ]
+  },
+  {
+    "id": 54,
+    "question": "Sebutkan hal yang dibawa saat piknik!",
+    "answers": [
+      { "text": "Makanan/bekal", "score": 30 },
+      { "text": "Tikar/alas", "score": 25 },
+      { "text": "Minuman", "score": 18 },
+      { "text": "Kamera/HP", "score": 12 },
+      { "text": "Bola", "score": 9 },
+      { "text": "Sunblock", "score": 6 }
+    ]
+  },
+  {
+    "id": 55,
+    "question": "Sebutkan alasan orang bangun pagi!",
+    "answers": [
+      { "text": "Kerja/sekolah", "score": 35 },
+      { "text": "Sholat subuh", "score": 25 },
+      { "text": "Olahraga", "score": 16 },
+      { "text": "Alarm bunyi", "score": 12 },
+      { "text": "Kebiasaan", "score": 8 },
+      { "text": "Berisik", "score": 4 }
+    ]
+  },
+  {
+    "id": 56,
+    "question": "Sebutkan jenis sambal yang populer!",
+    "answers": [
+      { "text": "Sambal terasi", "score": 30 },
+      { "text": "Sambal matah", "score": 25 },
+      { "text": "Sambal ijo", "score": 18 },
+      { "text": "Sambal bajak", "score": 12 },
+      { "text": "Sambal dabu-dabu", "score": 9 },
+      { "text": "Sambal geprek", "score": 6 }
+    ]
+  },
+  {
+    "id": 57,
+    "question": "Sebutkan hal yang ada di dompet!",
+    "answers": [
+      { "text": "Uang", "score": 35 },
+      { "text": "KTP", "score": 25 },
+      { "text": "Kartu ATM", "score": 18 },
+      { "text": "SIM", "score": 10 },
+      { "text": "Foto", "score": 7 },
+      { "text": "Struk belanja", "score": 5 }
+    ]
+  },
+  {
+    "id": 58,
+    "question": "Sebutkan acara yang diadakan di kampung!",
+    "answers": [
+      { "text": "17 Agustus", "score": 30 },
+      { "text": "Pengajian", "score": 22 },
+      { "text": "Kerja bakti", "score": 18 },
+      { "text": "Hajatan/nikahan", "score": 14 },
+      { "text": "Ronda malam", "score": 10 },
+      { "text": "Arisan", "score": 6 }
+    ]
+  },
+  {
+    "id": 59,
+    "question": "Sebutkan alasan orang pakai kacamata!",
+    "answers": [
+      { "text": "Mata minus", "score": 35 },
+      { "text": "Gaya/fashion", "score": 25 },
+      { "text": "Silau matahari", "score": 16 },
+      { "text": "Kerja di komputer", "score": 12 },
+      { "text": "Baca buku", "score": 8 },
+      { "text": "Mata plus", "score": 4 }
+    ]
+  },
+  {
+    "id": 60,
+    "question": "Sebutkan jenis mie instan yang populer!",
+    "answers": [
+      { "text": "Indomie goreng", "score": 35 },
+      { "text": "Indomie kuah", "score": 22 },
+      { "text": "Mie Sedaap", "score": 18 },
+      { "text": "Pop Mie", "score": 12 },
+      { "text": "Sarimi", "score": 8 },
+      { "text": "Samyang", "score": 5 }
+    ]
+  }
+,
+  {
+    "id": 61,
+    "question": "Sebutkan hal yang bikin orang tersenyum!",
+    "answers": [
+      { "text": "Dapat uang", "score": 28 },
+      { "text": "Dipuji", "score": 22 },
+      { "text": "Ketemu pacar", "score": 18 },
+      { "text": "Makan enak", "score": 14 },
+      { "text": "Video lucu", "score": 12 },
+      { "text": "Anak kecil lucu", "score": 6 }
+    ]
+  },
+  {
+    "id": 62,
+    "question": "Sebutkan profesi yang pakai seragam!",
+    "answers": [
+      { "text": "Polisi", "score": 28 },
+      { "text": "TNI/tentara", "score": 25 },
+      { "text": "Dokter/perawat", "score": 18 },
+      { "text": "Pelajar", "score": 14 },
+      { "text": "Pilot", "score": 10 },
+      { "text": "Satpam", "score": 5 }
+    ]
+  },
+  {
+    "id": 63,
+    "question": "Sebutkan hal yang dilakukan saat ulang tahun!",
+    "answers": [
+      { "text": "Tiup lilin", "score": 30 },
+      { "text": "Potong kue", "score": 25 },
+      { "text": "Pesta/makan-makan", "score": 18 },
+      { "text": "Buka kado", "score": 12 },
+      { "text": "Foto-foto", "score": 9 },
+      { "text": "Disiram air", "score": 6 }
+    ]
+  },
+  {
+    "id": 64,
+    "question": "Sebutkan tempat nongkrong anak muda!",
+    "answers": [
+      { "text": "Cafe/coffee shop", "score": 32 },
+      { "text": "Mall", "score": 25 },
+      { "text": "Warkop", "score": 16 },
+      { "text": "Taman", "score": 12 },
+      { "text": "Bioskop", "score": 9 },
+      { "text": "Rumah teman", "score": 6 }
+    ]
+  },
+  {
+    "id": 65,
+    "question": "Sebutkan hal yang bikin badan capek!",
+    "answers": [
+      { "text": "Kerja seharian", "score": 30 },
+      { "text": "Olahraga", "score": 25 },
+      { "text": "Kurang tidur", "score": 18 },
+      { "text": "Bersih-bersih", "score": 12 },
+      { "text": "Jalan jauh", "score": 9 },
+      { "text": "Pindahan rumah", "score": 6 }
+    ]
+  },
+  {
+    "id": 66,
+    "question": "Sebutkan jenis teh yang populer!",
+    "answers": [
+      { "text": "Teh manis", "score": 30 },
+      { "text": "Teh tarik", "score": 22 },
+      { "text": "Green tea", "score": 18 },
+      { "text": "Thai tea", "score": 14 },
+      { "text": "Teh botol", "score": 10 },
+      { "text": "Earl grey", "score": 6 }
+    ]
+  },
+  {
+    "id": 67,
+    "question": "Sebutkan hal yang bikin rumah berantakan!",
+    "answers": [
+      { "text": "Baju berserakan", "score": 30 },
+      { "text": "Anak kecil", "score": 25 },
+      { "text": "Malas bersih-bersih", "score": 18 },
+      { "text": "Piring kotor", "score": 12 },
+      { "text": "Banyak barang", "score": 9 },
+      { "text": "Hewan peliharaan", "score": 6 }
+    ]
+  },
+  {
+    "id": 68,
+    "question": "Sebutkan alasan orang ke salon!",
+    "answers": [
+      { "text": "Potong rambut", "score": 32 },
+      { "text": "Cat rambut", "score": 25 },
+      { "text": "Creambath", "score": 16 },
+      { "text": "Facial", "score": 12 },
+      { "text": "Manicure/pedicure", "score": 9 },
+      { "text": "Smoothing/rebonding", "score": 6 }
+    ]
+  },
+  {
+    "id": 69,
+    "question": "Sebutkan makanan yang pedas!",
+    "answers": [
+      { "text": "Ayam geprek", "score": 28 },
+      { "text": "Sambal", "score": 25 },
+      { "text": "Seblak", "score": 18 },
+      { "text": "Mie pedas", "score": 14 },
+      { "text": "Cabe rawit", "score": 10 },
+      { "text": "Rendang", "score": 5 }
+    ]
+  },
+  {
+    "id": 70,
+    "question": "Sebutkan hal yang ada di pantai!",
+    "answers": [
+      { "text": "Pasir", "score": 28 },
+      { "text": "Ombak/laut", "score": 25 },
+      { "text": "Kelapa/pohon", "score": 18 },
+      { "text": "Perahu", "score": 12 },
+      { "text": "Batu karang", "score": 10 },
+      { "text": "Penjual makanan", "score": 7 }
+    ]
+  },
+  {
+    "id": 71,
+    "question": "Sebutkan alasan orang telat bayar tagihan!",
+    "answers": [
+      { "text": "Lupa", "score": 32 },
+      { "text": "Belum gajian", "score": 28 },
+      { "text": "Malas", "score": 16 },
+      { "text": "Gak ada pulsa/internet", "score": 10 },
+      { "text": "Sibuk", "score": 9 },
+      { "text": "Gak tau caranya", "score": 5 }
+    ]
+  },
+  {
+    "id": 72,
+    "question": "Sebutkan hal yang bikin orang kangen kampung halaman!",
+    "answers": [
+      { "text": "Masakan ibu", "score": 30 },
+      { "text": "Keluarga", "score": 28 },
+      { "text": "Teman lama", "score": 16 },
+      { "text": "Suasana tenang", "score": 12 },
+      { "text": "Lebaran/hari raya", "score": 9 },
+      { "text": "Pemandangan", "score": 5 }
+    ]
+  },
+  {
+    "id": 73,
+    "question": "Sebutkan jenis sepatu yang populer!",
+    "answers": [
+      { "text": "Sneakers", "score": 30 },
+      { "text": "Sandal", "score": 25 },
+      { "text": "Boots", "score": 16 },
+      { "text": "High heels", "score": 12 },
+      { "text": "Sepatu formal", "score": 10 },
+      { "text": "Slip on", "score": 7 }
+    ]
+  },
+  {
+    "id": 74,
+    "question": "Sebutkan hal yang dilakukan saat menunggu!",
+    "answers": [
+      { "text": "Main HP", "score": 35 },
+      { "text": "Dengerin musik", "score": 22 },
+      { "text": "Baca", "score": 16 },
+      { "text": "Ngobrol", "score": 12 },
+      { "text": "Melamun", "score": 9 },
+      { "text": "Makan snack", "score": 6 }
+    ]
+  },
+  {
+    "id": 75,
+    "question": "Sebutkan hal yang bikin orang bangga!",
+    "answers": [
+      { "text": "Lulus sekolah/kuliah", "score": 28 },
+      { "text": "Dapat kerja", "score": 22 },
+      { "text": "Beli rumah", "score": 18 },
+      { "text": "Anak berprestasi", "score": 14 },
+      { "text": "Naik jabatan", "score": 12 },
+      { "text": "Nikah", "score": 6 }
+    ]
+  }
+,
+  {
+    "id": 76,
+    "question": "Sebutkan hal yang bikin orang takut!",
+    "answers": [
+      { "text": "Hantu", "score": 30 },
+      { "text": "Gelap", "score": 22 },
+      { "text": "Ketinggian", "score": 18 },
+      { "text": "Ular/hewan", "score": 14 },
+      { "text": "Kematian", "score": 10 },
+      { "text": "Gempa bumi", "score": 6 }
+    ]
+  },
+  {
+    "id": 77,
+    "question": "Sebutkan jenis roti yang populer!",
+    "answers": [
+      { "text": "Roti tawar", "score": 28 },
+      { "text": "Roti coklat", "score": 22 },
+      { "text": "Croissant", "score": 18 },
+      { "text": "Roti keju", "score": 14 },
+      { "text": "Donat", "score": 12 },
+      { "text": "Roti gandum", "score": 6 }
+    ]
+  },
+  {
+    "id": 78,
+    "question": "Sebutkan hal yang sering dikeluhkan soal cuaca!",
+    "answers": [
+      { "text": "Kepanasan", "score": 32 },
+      { "text": "Hujan terus", "score": 25 },
+      { "text": "Banjir", "score": 16 },
+      { "text": "Macet karena hujan", "score": 12 },
+      { "text": "Lembab", "score": 9 },
+      { "text": "Angin kencang", "score": 6 }
+    ]
+  },
+  {
+    "id": 79,
+    "question": "Sebutkan hal yang ada di taman!",
+    "answers": [
+      { "text": "Pohon/tanaman", "score": 28 },
+      { "text": "Bangku", "score": 22 },
+      { "text": "Bunga", "score": 18 },
+      { "text": "Air mancur", "score": 14 },
+      { "text": "Jogging track", "score": 12 },
+      { "text": "Playground", "score": 6 }
+    ]
+  },
+  {
+    "id": 80,
+    "question": "Sebutkan alasan orang ganti nomor HP!",
+    "answers": [
+      { "text": "Hilang/dicuri", "score": 28 },
+      { "text": "Banyak spam", "score": 22 },
+      { "text": "Sinyal jelek", "score": 18 },
+      { "text": "Ganti provider", "score": 14 },
+      { "text": "Putus sama mantan", "score": 12 },
+      { "text": "Lupa PIN/PUK", "score": 6 }
+    ]
+  },
+  {
+    "id": 81,
+    "question": "Sebutkan makanan yang dimakan saat sarapan!",
+    "answers": [
+      { "text": "Nasi goreng", "score": 28 },
+      { "text": "Roti", "score": 25 },
+      { "text": "Bubur ayam", "score": 18 },
+      { "text": "Telur", "score": 13 },
+      { "text": "Mie instan", "score": 10 },
+      { "text": "Sereal", "score": 6 }
+    ]
+  },
+  {
+    "id": 82,
+    "question": "Sebutkan hal yang bikin orang tertawa!",
+    "answers": [
+      { "text": "Lelucon/jokes", "score": 30 },
+      { "text": "Video lucu", "score": 25 },
+      { "text": "Teman konyol", "score": 18 },
+      { "text": "Meme", "score": 12 },
+      { "text": "Orang jatuh", "score": 9 },
+      { "text": "Stand up comedy", "score": 6 }
+    ]
+  },
+  {
+    "id": 83,
+    "question": "Sebutkan barang yang mahal tapi diinginkan!",
+    "answers": [
+      { "text": "Mobil", "score": 30 },
+      { "text": "Rumah", "score": 28 },
+      { "text": "iPhone", "score": 16 },
+      { "text": "Laptop gaming", "score": 12 },
+      { "text": "Motor gede", "score": 8 },
+      { "text": "Jam tangan branded", "score": 6 }
+    ]
+  },
+  {
+    "id": 84,
+    "question": "Sebutkan hal yang dilakukan saat tahun baru!",
+    "answers": [
+      { "text": "Kembang api", "score": 30 },
+      { "text": "Countdown", "score": 25 },
+      { "text": "Pesta/kumpul", "score": 18 },
+      { "text": "Bakar-bakar", "score": 12 },
+      { "text": "Terompet", "score": 9 },
+      { "text": "Berdoa", "score": 6 }
+    ]
+  },
+  {
+    "id": 85,
+    "question": "Sebutkan alasan orang suka nonton drakor!",
+    "answers": [
+      { "text": "Aktor/aktris ganteng/cantik", "score": 30 },
+      { "text": "Cerita bagus", "score": 25 },
+      { "text": "Romantis", "score": 18 },
+      { "text": "Ikut tren", "score": 12 },
+      { "text": "Belajar bahasa Korea", "score": 9 },
+      { "text": "Soundtrack bagus", "score": 6 }
+    ]
+  },
+  {
+    "id": 86,
+    "question": "Sebutkan hal yang bikin orang stres!",
+    "answers": [
+      { "text": "Kerjaan numpuk", "score": 30 },
+      { "text": "Masalah keuangan", "score": 25 },
+      { "text": "Hubungan", "score": 16 },
+      { "text": "Macet", "score": 12 },
+      { "text": "Ujian/tugas", "score": 10 },
+      { "text": "Sakit", "score": 7 }
+    ]
+  },
+  {
+    "id": 87,
+    "question": "Sebutkan jenis kopi yang populer!",
+    "answers": [
+      { "text": "Kopi susu", "score": 30 },
+      { "text": "Americano", "score": 22 },
+      { "text": "Cappuccino", "score": 18 },
+      { "text": "Latte", "score": 14 },
+      { "text": "Espresso", "score": 10 },
+      { "text": "Kopi tubruk", "score": 6 }
+    ]
+  },
+  {
+    "id": 88,
+    "question": "Sebutkan hal yang dilakukan saat lebaran!",
+    "answers": [
+      { "text": "Silaturahmi", "score": 30 },
+      { "text": "Makan ketupat/opor", "score": 25 },
+      { "text": "Dapat THR", "score": 18 },
+      { "text": "Sholat Ied", "score": 12 },
+      { "text": "Mudik", "score": 9 },
+      { "text": "Pakai baju baru", "score": 6 }
+    ]
+  },
+  {
+    "id": 89,
+    "question": "Sebutkan hal yang bikin orang iri!",
+    "answers": [
+      { "text": "Orang kaya", "score": 28 },
+      { "text": "Liburan ke luar negeri", "score": 22 },
+      { "text": "Pasangan romantis", "score": 18 },
+      { "text": "Badan ideal", "score": 14 },
+      { "text": "Mobil mewah", "score": 12 },
+      { "text": "Karir sukses", "score": 6 }
+    ]
+  },
+  {
+    "id": 90,
+    "question": "Sebutkan hal yang ada di warung makan!",
+    "answers": [
+      { "text": "Meja kursi", "score": 28 },
+      { "text": "Menu/daftar harga", "score": 22 },
+      { "text": "Etalase makanan", "score": 18 },
+      { "text": "TV", "score": 14 },
+      { "text": "Tisu/tusuk gigi", "score": 12 },
+      { "text": "Kerupuk", "score": 6 }
+    ]
+  }
+,
+  {
+    "id": 91,
+    "question": "Sebutkan alasan orang pakai masker!",
+    "answers": [
+      { "text": "Covid/virus", "score": 30 },
+      { "text": "Polusi/debu", "score": 25 },
+      { "text": "Flu/batuk", "score": 18 },
+      { "text": "Jerawat/gak makeup", "score": 12 },
+      { "text": "Bau", "score": 9 },
+      { "text": "Aturan", "score": 6 }
+    ]
+  },
+  {
+    "id": 92,
+    "question": "Sebutkan hal yang bikin orang nostalgia!",
+    "answers": [
+      { "text": "Lagu lama", "score": 28 },
+      { "text": "Foto masa kecil", "score": 22 },
+      { "text": "Teman sekolah", "score": 18 },
+      { "text": "Jajanan jadul", "score": 14 },
+      { "text": "Film/kartun lama", "score": 12 },
+      { "text": "Mainan dulu", "score": 6 }
+    ]
+  },
+  {
+    "id": 93,
+    "question": "Sebutkan hal yang sering diminta anak kecil!",
+    "answers": [
+      { "text": "Mainan", "score": 30 },
+      { "text": "Es krim", "score": 25 },
+      { "text": "HP/tablet", "score": 18 },
+      { "text": "Jajan", "score": 12 },
+      { "text": "Digendong", "score": 9 },
+      { "text": "Nonton TV", "score": 6 }
+    ]
+  },
+  {
+    "id": 94,
+    "question": "Sebutkan tempat yang ramai saat weekend!",
+    "answers": [
+      { "text": "Mall", "score": 30 },
+      { "text": "Tempat wisata", "score": 25 },
+      { "text": "Restoran", "score": 18 },
+      { "text": "Bioskop", "score": 12 },
+      { "text": "Taman/alun-alun", "score": 9 },
+      { "text": "Pasar", "score": 6 }
+    ]
+  },
+  {
+    "id": 95,
+    "question": "Sebutkan hal yang bikin orang gagal diet!",
+    "answers": [
+      { "text": "Godaan makanan enak", "score": 32 },
+      { "text": "Malas olahraga", "score": 22 },
+      { "text": "Stres", "score": 16 },
+      { "text": "Diajak makan teman", "score": 12 },
+      { "text": "Lapar malam", "score": 10 },
+      { "text": "Gak konsisten", "score": 8 }
+    ]
+  },
+  {
+    "id": 96,
+    "question": "Sebutkan hal yang dilakukan ibu rumah tangga!",
+    "answers": [
+      { "text": "Masak", "score": 30 },
+      { "text": "Bersih-bersih", "score": 25 },
+      { "text": "Cuci baju", "score": 18 },
+      { "text": "Urus anak", "score": 13 },
+      { "text": "Belanja", "score": 9 },
+      { "text": "Setrika", "score": 5 }
+    ]
+  },
+  {
+    "id": 97,
+    "question": "Sebutkan alasan orang suka kucing!",
+    "answers": [
+      { "text": "Lucu/imut", "score": 32 },
+      { "text": "Lembut/halus", "score": 22 },
+      { "text": "Mandiri", "score": 16 },
+      { "text": "Gak bau", "score": 12 },
+      { "text": "Manja", "score": 10 },
+      { "text": "Gak perlu jalan", "score": 8 }
+    ]
+  },
+  {
+    "id": 98,
+    "question": "Sebutkan hal yang bikin HP cepat rusak!",
+    "answers": [
+      { "text": "Jatuh/banting", "score": 30 },
+      { "text": "Kena air", "score": 25 },
+      { "text": "Overcharge", "score": 16 },
+      { "text": "Panas berlebihan", "score": 12 },
+      { "text": "Storage penuh", "score": 10 },
+      { "text": "Virus/malware", "score": 7 }
+    ]
+  },
+  {
+    "id": 99,
+    "question": "Sebutkan hal yang bikin orang semangat kerja!",
+    "answers": [
+      { "text": "Gaji/bonus", "score": 32 },
+      { "text": "Naik jabatan", "score": 22 },
+      { "text": "Rekan kerja asik", "score": 18 },
+      { "text": "Passion", "score": 12 },
+      { "text": "Deadline", "score": 10 },
+      { "text": "Pujian bos", "score": 6 }
+    ]
+  },
+  {
+    "id": 100,
+    "question": "Sebutkan hal yang paling ditunggu setiap bulan!",
+    "answers": [
+      { "text": "Gajian", "score": 40 },
+      { "text": "Weekend/libur", "score": 22 },
+      { "text": "Tanggal merah", "score": 15 },
+      { "text": "Promo/diskon", "score": 10 },
+      { "text": "Film/series baru", "score": 8 },
+      { "text": "Arisan", "score": 5 }
+    ]
+  }
+]

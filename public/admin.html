@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin - Super Family 100</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffd700;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #4a90d9;
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    /* Add/Edit Question Form */
+    .add-form {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #333;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .add-form h2 {
+      color: #ffd700;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #aaa;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #ffd700;
+    }
+
+    .answers-section h3 {
+      color: #ccc;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .answer-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .answer-row input.answer-text {
+      flex: 1;
+      padding: 10px 12px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .answer-row input.answer-text:focus {
+      border-color: #ffd700;
+    }
+
+    .answer-row input.answer-score {
+      width: 80px;
+      padding: 10px 8px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffd700;
+      font-size: 0.95rem;
+      text-align: center;
+      outline: none;
+    }
+
+    .answer-row input.answer-score:focus {
+      border-color: #ffd700;
+    }
+
+    .answer-row .remove-answer {
+      background: #e53e3e;
+      border: none;
+      color: #fff;
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+
+    .answer-row .remove-answer:hover {
+      background: #c53030;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-add-answer {
+      background: rgba(74, 144, 217, 0.2);
+      border: 1px dashed #4a90d9;
+      color: #4a90d9;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-add-answer:hover {
+      background: rgba(74, 144, 217, 0.3);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #ffd700, #ffaa00);
+      color: #1a1a2e;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    .btn-cancel {
+      background: rgba(113, 128, 150, 0.3);
+      border: 1px solid #718096;
+      color: #aaa;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(113, 128, 150, 0.5);
+      color: #fff;
+    }
+
+    /* Questions List */
+    .questions-list h2 {
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
+    .question-count {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    .question-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 12px;
+      transition: border-color 0.3s;
+    }
+
+    .question-card:hover {
+      border-color: #4a5568;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      color: #fff;
+      flex: 1;
+    }
+
+    .question-id {
+      color: #ffd700;
+      font-size: 0.8rem;
+      background: rgba(255, 215, 0, 0.1);
+      padding: 3px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .question-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-edit {
+      background: rgba(74, 144, 217, 0.2);
+      border: 1px solid #4a90d9;
+      color: #4a90d9;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+
+    .btn-edit:hover {
+      background: #4a90d9;
+      color: #fff;
+    }
+
+    .btn-delete {
+      background: rgba(229, 62, 62, 0.2);
+      border: 1px solid #e53e3e;
+      color: #e53e3e;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+
+    .btn-delete:hover {
+      background: #e53e3e;
+      color: #fff;
+    }
+
+    .answers-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .answer-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .answer-item .text { color: #ccc; }
+    .answer-item .score { color: #ffd700; font-weight: bold; }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-weight: bold;
+      z-index: 1000;
+      animation: slideDown 0.3s ease;
+    }
+
+    .notification.success { background: linear-gradient(135deg, #48bb78, #38a169); }
+    .notification.error { background: linear-gradient(135deg, #e53e3e, #c53030); }
+
+    @keyframes slideDown {
+      from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    /* Modal overlay for edit */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 1px solid #333;
+      border-radius: 15px;
+      padding: 25px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      h1 { font-size: 1.5rem; }
+      .add-form { padding: 15px; }
+      .question-card { padding: 15px; }
+      .answers-list { grid-template-columns: 1fr; }
+      .question-header { flex-direction: column; }
+      .question-actions { align-self: flex-end; }
+      .answer-row { flex-wrap: wrap; }
+      .answer-row input.answer-text { min-width: 0; }
+      .answer-row input.answer-score { width: 70px; }
+      .modal-content { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← Kembali ke Game</a>
+    <h1>⚙️ Admin Panel</h1>
+    <p class="subtitle">Kelola pertanyaan Super Family 100</p>
+
+    <!-- Add Question Form -->
+    <div class="add-form">
+      <h2>➕ Tambah Pertanyaan Baru</h2>
+      <div class="form-group">
+        <label>Pertanyaan:</label>
+        <input type="text" id="newQuestion" placeholder="Contoh: Sebutkan buah yang berwarna merah!">
+      </div>
+
+      <div class="answers-section">
+        <h3>Jawaban (urutkan dari skor tertinggi):</h3>
+        <div id="answersContainer">
+          <div class="answer-row">
+            <input type="text" class="answer-text" placeholder="Jawaban 1">
+            <input type="number" class="answer-score" placeholder="Skor" min="1" max="100">
+            <button class="remove-answer" onclick="removeAnswerRow(this)">×</button>
+          </div>
+          <div class="answer-row">
+            <input type="text" class="answer-text" placeholder="Jawaban 2">
+            <input type="number" class="answer-score" placeholder="Skor" min="1" max="100">
+            <button class="remove-answer" onclick="removeAnswerRow(this)">×</button>
+          </div>
+          <div class="answer-row">
+            <input type="text" class="answer-text" placeholder="Jawaban 3">
+            <input type="number" class="answer-score" placeholder="Skor" min="1" max="100">
+            <button class="remove-answer" onclick="removeAnswerRow(this)">×</button>
+          </div>
+        </div>
+        <button class="btn-add-answer" onclick="addAnswerRow('answersContainer')">+ Tambah Jawaban</button>
+      </div>
+
+      <button class="btn btn-submit" onclick="submitQuestion()">💾 Simpan Pertanyaan</button>
+    </div>
+
+    <!-- Questions List -->
+    <div class="questions-list">
+      <h2>📋 Daftar Pertanyaan</h2>
+      <p class="question-count">Total: <span id="totalQuestions">0</span> pertanyaan</p>
+      <div id="questionsList"></div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <h2>✏️ Edit Pertanyaan</h2>
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>Pertanyaan:</label>
+        <input type="text" id="editQuestion" placeholder="Pertanyaan...">
+      </div>
+
+      <div class="answers-section">
+        <h3>Jawaban:</h3>
+        <div id="editAnswersContainer"></div>
+        <button class="btn-add-answer" onclick="addAnswerRow('editAnswersContainer')">+ Tambah Jawaban</button>
+      </div>
+
+      <button class="btn btn-submit" onclick="saveEdit()">💾 Simpan Perubahan</button>
+      <button class="btn btn-cancel" onclick="closeEditModal()">Batal</button>
+    </div>
+  </div>
+
+  <script>
+    // Load questions on page load
+    loadQuestions();
+
+    async function loadQuestions() {
+      try {
+        const res = await fetch('/api/questions');
+        const questions = await res.json();
+        renderQuestions(questions);
+      } catch (err) {
+        showNotification('Gagal memuat pertanyaan!', 'error');
+      }
+    }
+
+    function renderQuestions(questions) {
+      document.getElementById('totalQuestions').textContent = questions.length;
+      const container = document.getElementById('questionsList');
+      container.innerHTML = '';
+
+      questions.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <div class="question-header">
+            <span class="question-text">${q.question}</span>
+            <span class="question-id">#${q.id}</span>
+            <div class="question-actions">
+              <button class="btn-edit" onclick='openEditModal(${JSON.stringify(q).replace(/'/g, "&#39;")})'>✏️ Edit</button>
+              <button class="btn-delete" onclick="deleteQuestion(${q.id})">🗑️ Hapus</button>
+            </div>
+          </div>
+          <div class="answers-list">
+            ${q.answers.map((a, i) => `
+              <div class="answer-item">
+                <span class="text">${i + 1}. ${a.text}</span>
+                <span class="score">${a.score}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // === ADD QUESTION ===
+    function addAnswerRow(containerId) {
+      const container = document.getElementById(containerId);
+      const count = container.children.length + 1;
+      const row = document.createElement('div');
+      row.className = 'answer-row';
+      row.innerHTML = `
+        <input type="text" class="answer-text" placeholder="Jawaban ${count}">
+        <input type="number" class="answer-score" placeholder="Skor" min="1" max="100">
+        <button class="remove-answer" onclick="removeAnswerRow(this)">×</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function removeAnswerRow(btn) {
+      const container = btn.parentElement.parentElement;
+      if (container.children.length > 2) {
+        btn.parentElement.remove();
+      } else {
+        showNotification('Minimal 2 jawaban!', 'error');
+      }
+    }
+
+    async function submitQuestion() {
+      const question = document.getElementById('newQuestion').value.trim();
+      if (!question) {
+        showNotification('Pertanyaan harus diisi!', 'error');
+        return;
+      }
+
+      const rows = document.querySelectorAll('#answersContainer .answer-row');
+      const answers = [];
+      for (const row of rows) {
+        const text = row.querySelector('.answer-text').value.trim();
+        const score = parseInt(row.querySelector('.answer-score').value);
+        if (text && score) {
+          answers.push({ text, score });
+        }
+      }
+
+      if (answers.length < 2) {
+        showNotification('Minimal 2 jawaban dengan skor!', 'error');
+        return;
+      }
+
+      answers.sort((a, b) => b.score - a.score);
+
+      try {
+        const res = await fetch('/api/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, answers })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showNotification('Pertanyaan berhasil ditambahkan!', 'success');
+          document.getElementById('newQuestion').value = '';
+          document.querySelectorAll('#answersContainer .answer-text').forEach(i => i.value = '');
+          document.querySelectorAll('#answersContainer .answer-score').forEach(i => i.value = '');
+          loadQuestions();
+        } else {
+          showNotification(data.error || 'Gagal menyimpan!', 'error');
+        }
+      } catch (err) {
+        showNotification('Gagal menyimpan pertanyaan!', 'error');
+      }
+    }
+
+    // === DELETE QUESTION ===
+    async function deleteQuestion(id) {
+      if (!confirm('Yakin mau hapus pertanyaan ini?')) return;
+
+      try {
+        const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          showNotification('Pertanyaan dihapus!', 'success');
+          loadQuestions();
+        }
+      } catch (err) {
+        showNotification('Gagal menghapus!', 'error');
+      }
+    }
+
+    // === EDIT QUESTION ===
+    function openEditModal(question) {
+      document.getElementById('editId').value = question.id;
+      document.getElementById('editQuestion').value = question.question;
+
+      const container = document.getElementById('editAnswersContainer');
+      container.innerHTML = '';
+
+      question.answers.forEach((ans, i) => {
+        const row = document.createElement('div');
+        row.className = 'answer-row';
+        row.innerHTML = `
+          <input type="text" class="answer-text" value="${ans.text}" placeholder="Jawaban ${i + 1}">
+          <input type="number" class="answer-score" value="${ans.score}" placeholder="Skor" min="1" max="100">
+          <button class="remove-answer" onclick="removeAnswerRow(this)">×</button>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    async function saveEdit() {
+      const id = parseInt(document.getElementById('editId').value);
+      const question = document.getElementById('editQuestion').value.trim();
+
+      if (!question) {
+        showNotification('Pertanyaan harus diisi!', 'error');
+        return;
+      }
+
+      const rows = document.querySelectorAll('#editAnswersContainer .answer-row');
+      const answers = [];
+      for (const row of rows) {
+        const text = row.querySelector('.answer-text').value.trim();
+        const score = parseInt(row.querySelector('.answer-score').value);
+        if (text && score) {
+          answers.push({ text, score });
+        }
+      }
+
+      if (answers.length < 2) {
+        showNotification('Minimal 2 jawaban dengan skor!', 'error');
+        return;
+      }
+
+      answers.sort((a, b) => b.score - a.score);
+
+      try {
+        const res = await fetch(`/api/questions/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, answers })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showNotification('Pertanyaan berhasil diupdate!', 'success');
+          closeEditModal();
+          loadQuestions();
+        } else {
+          showNotification(data.error || 'Gagal menyimpan!', 'error');
+        }
+      } catch (err) {
+        showNotification('Gagal menyimpan perubahan!', 'error');
+      }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('editModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('editModal')) {
+        closeEditModal();
+      }
+    });
+
+    function showNotification(message, type) {
+      const notif = document.createElement('div');
+      notif.className = `notification ${type}`;
+      notif.textContent = message;
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
