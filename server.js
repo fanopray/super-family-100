@@ -134,29 +134,83 @@ function matchAnswer(question, answer, revealedAnswers) {
     const ans = question.answers[i].text.toLowerCase();
     // Exact/partial match
     if (ans.includes(normalized) || normalized.includes(ans)) return i;
-    // Fuzzy match - handle common Indonesian spelling variations
+    // Abbreviation match
+    if (matchAbbreviation(normalized, ans)) return i;
+    // Fuzzy match
     if (fuzzyMatch(normalized, ans)) return i;
   }
   return null;
 }
 
+// Common abbreviations and alternate spellings
+const abbreviations = {
+  'hp': ['handphone', 'hp/handphone', 'hp', 'telepon', 'hape'],
+  'handphone': ['hp', 'hp/handphone', 'hape'],
+  'hape': ['hp', 'handphone', 'hp/handphone'],
+  'tv': ['televisi', 'tv', 'tivi'],
+  'televisi': ['tv', 'tivi'],
+  'ac': ['air conditioner', 'ac', 'pendingin ruangan'],
+  'motor': ['sepeda motor', 'motor'],
+  'mobil': ['mobil', 'kendaraan'],
+  'ig': ['instagram', 'ig'],
+  'instagram': ['ig', 'instagram'],
+  'wa': ['whatsapp', 'wa'],
+  'whatsapp': ['wa', 'whatsapp'],
+  'fb': ['facebook', 'fb'],
+  'facebook': ['fb', 'facebook'],
+  'yt': ['youtube', 'yt'],
+  'youtube': ['yt', 'youtube'],
+  'tt': ['tiktok', 'tt'],
+  'tiktok': ['tt', 'tiktok'],
+  'krl': ['kereta', 'krl', 'commuter line'],
+  'ojol': ['ojek online', 'ojol'],
+  'ojek online': ['ojol', 'ojek online'],
+  'gojek': ['gojek', 'ojol', 'ojek online'],
+  'grab': ['grab', 'ojol', 'ojek online'],
+  'wfh': ['work from home', 'wfh', 'kerja dari rumah'],
+  'pns': ['pegawai negeri', 'pns', 'pegawai negeri sipil'],
+  'ktp': ['kartu tanda penduduk', 'ktp'],
+  'sim': ['surat izin mengemudi', 'sim'],
+  'atm': ['atm', 'kartu atm', 'kartu debit'],
+  'sd': ['sekolah dasar', 'sd'],
+  'smp': ['sekolah menengah pertama', 'smp'],
+  'sma': ['sekolah menengah atas', 'sma'],
+  'wifi': ['wifi', 'wi-fi', 'internet'],
+  'mie': ['mie', 'mi', 'mie instan'],
+  'mi': ['mie', 'mi', 'mie instan'],
+  'nasi goreng': ['nasgor', 'nasi goreng'],
+  'nasgor': ['nasi goreng', 'nasgor'],
+  'indomie': ['indomie', 'mie instan', 'indomie goreng'],
+};
+
+function matchAbbreviation(input, target) {
+  // Check if input is an abbreviation of target or vice versa
+  const inputAbbrs = abbreviations[input] || [];
+  const targetAbbrs = abbreviations[target] || [];
+  
+  // Input matches one of target's alternate forms
+  if (targetAbbrs.includes(input)) return true;
+  // Target matches one of input's alternate forms
+  if (inputAbbrs.includes(target)) return true;
+  
+  // Check if any of input's forms match target (partial)
+  for (const form of inputAbbrs) {
+    if (target.includes(form) || form.includes(target)) return true;
+  }
+  // Check if any of target's forms match input (partial)
+  for (const form of targetAbbrs) {
+    if (input.includes(form) || form.includes(input)) return true;
+  }
+  
+  return false;
+}
+
 function fuzzyMatch(input, target) {
-  // Normalize common variations
   const normalize = (str) => {
     return str
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, ' ')
-      .trim()
-      // Common Indonesian spelling variations
-      .replace(/oe/g, 'u')
-      .replace(/dj/g, 'j')
-      .replace(/tj/g, 'c')
-      .replace(/nj/g, 'ny')
-      .replace(/sj/g, 'sy')
-      .replace(/ch/g, 'k')
-      // Vowel variations
-      .replace(/e/g, 'e') // normalize e
-      .replace(/o/g, 'o');
+      .trim();
   };
 
   const n1 = normalize(input);
@@ -165,11 +219,10 @@ function fuzzyMatch(input, target) {
   if (n1 === n2) return true;
   if (n1.includes(n2) || n2.includes(n1)) return true;
 
-  // Check similarity (Levenshtein-like for short words)
+  // Check similarity (Levenshtein)
   if (n1.length >= 3 && n2.length >= 3) {
     const maxLen = Math.max(n1.length, n2.length);
     const dist = levenshtein(n1, n2);
-    // Allow 1 char difference for words <= 5 chars, 2 for longer
     const threshold = maxLen <= 5 ? 1 : 2;
     if (dist <= threshold) return true;
   }

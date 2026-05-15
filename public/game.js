@@ -529,6 +529,26 @@ function spFuzzyMatch(input, target) {
   const n1 = normalize(input);
   const n2 = normalize(target);
   if (n1 === n2) return true;
+  
+  // Abbreviation check
+  const abbrs = {
+    'hp':['handphone','hp/handphone','hape'],'handphone':['hp','hp/handphone'],
+    'hape':['hp','handphone'],'tv':['televisi','tivi'],'televisi':['tv'],
+    'ac':['air conditioner','pendingin'],'ig':['instagram'],'instagram':['ig'],
+    'wa':['whatsapp'],'whatsapp':['wa'],'fb':['facebook'],'facebook':['fb'],
+    'yt':['youtube'],'youtube':['yt'],'tt':['tiktok'],'tiktok':['tt'],
+    'ojol':['ojek online'],'ojek online':['ojol'],'nasgor':['nasi goreng'],
+    'nasi goreng':['nasgor'],'wifi':['wi-fi','internet'],'mie':['mi'],
+    'mi':['mie'],'wfh':['work from home','kerja dari rumah'],
+    'pns':['pegawai negeri'],'ktp':['kartu tanda penduduk'],
+  };
+  const inputForms = abbrs[n1] || [];
+  const targetForms = abbrs[n2] || [];
+  if (targetForms.includes(n1) || inputForms.includes(n2)) return true;
+  for (const f of inputForms) { if (n2.includes(f) || f.includes(n2)) return true; }
+  for (const f of targetForms) { if (n1.includes(f) || f.includes(n1)) return true; }
+  
+  // Levenshtein
   if (n1.length >= 3 && n2.length >= 3) {
     const maxLen = Math.max(n1.length, n2.length);
     const dist = spLevenshtein(n1, n2);
