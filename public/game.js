@@ -17,7 +17,7 @@ let clientTimer = null;
 // Single Player State
 let spQuestions = [];
 let spCurrentRound = 0;
-let spTotalRounds = 5;
+let spTotalRounds = 3;
 let spScore = 0;
 let spStrikes = 0;
 let spMaxStrikes = 3;
@@ -66,13 +66,13 @@ async function startSinglePlayer() {
     spCurrentRound = 0;
     spScore = 0;
 
-    document.getElementById('name-left').textContent = 'Kamu';
-    document.getElementById('name-right').textContent = 'Target';
+    document.getElementById('name-left').textContent = 'Skor';
+    document.getElementById('name-right').textContent = 'Babak';
     document.getElementById('points-left').textContent = '0';
-    document.getElementById('points-right').textContent = '100';
+    document.getElementById('points-right').textContent = '1x';
     document.getElementById('score-right').classList.remove('active-turn');
     document.getElementById('score-left').classList.add('active-turn');
-    document.getElementById('multiplierDisplay').style.display = 'none';
+    document.getElementById('multiplierDisplay').style.display = 'block';
 
     showScreen('game');
     spStartRound();
@@ -85,11 +85,14 @@ function spStartRound() {
   if (spCurrentRound >= spTotalRounds) { spEndGame(); return; }
 
   const question = spQuestions[spCurrentRound];
+  const multiplier = spCurrentRound + 1; // Babak 1=1x, 2=2x, 3=3x
   spStrikes = 0;
   spRevealedAnswers = [];
   spTimeLeft = 30;
 
-  document.getElementById('roundDisplay').textContent = `Ronde ${spCurrentRound + 1}/${spTotalRounds}`;
+  document.getElementById('roundDisplay').textContent = `Babak ${spCurrentRound + 1}/${spTotalRounds}`;
+  document.getElementById('multiplierDisplay').textContent = `Poin: ${multiplier}x`;
+  document.getElementById('points-right').textContent = `${multiplier}x`;
   document.getElementById('questionText').textContent = question.question;
   document.getElementById('strikesDisplay').innerHTML = '';
   document.getElementById('buzzerContainer').style.display = 'none';
@@ -97,7 +100,7 @@ function spStartRound() {
   document.getElementById('answerContainer').style.display = 'flex';
   document.getElementById('answerInput').value = '';
   document.getElementById('answerInput').focus();
-  document.getElementById('statusText').textContent = '🎯 Tebak jawaban survei terpopuler!';
+  document.getElementById('statusText').textContent = `🎯 Babak ${spCurrentRound + 1} (${multiplier}x poin) - Tebak jawaban!`;
   document.getElementById('timerContainer').style.display = 'block';
 
   generateAnswerBoard(question.answers.length);
@@ -132,6 +135,7 @@ function spRoundTimeout() {
 
 function spSubmitAnswer(answer) {
   const question = spQuestions[spCurrentRound];
+  const multiplier = spCurrentRound + 1;
   const normalized = answer.toLowerCase().trim();
   let matched = null;
   for (let i = 0; i < question.answers.length; i++) {
@@ -142,10 +146,16 @@ function spSubmitAnswer(answer) {
 
   if (matched !== null) {
     spRevealedAnswers.push(matched);
-    spScore += question.answers[matched].score;
+    const earnedScore = question.answers[matched].score * multiplier;
+    spScore += earnedScore;
     revealCard(matched, question.answers[matched].text, question.answers[matched].score);
     document.getElementById('points-left').textContent = spScore;
-    showNotification(`✅ "${question.answers[matched].text}" - ${question.answers[matched].score} poin!`, 'success');
+    showNotification(`✅ "${question.answers[matched].text}" - ${question.answers[matched].score} × ${multiplier} = ${earnedScore} poin!`, 'success');
+
+    // Reset timer 30 detik setiap jawab benar
+    clearInterval(spTimer);
+    spStartTimer();
+
     if (spRevealedAnswers.length === question.answers.length) {
       clearInterval(spTimer);
       showNotification('🎉 Sempurna!', 'success');
@@ -158,7 +168,7 @@ function spSubmitAnswer(answer) {
     showNotification(`❌ "${answer}" tidak ada!`, 'error');
     if (spStrikes >= spMaxStrikes) {
       clearInterval(spTimer);
-      showNotification('💥 3 Strike!', 'error');
+      showNotification('💥 3 Strike! Babak selesai!', 'error');
       spRevealAll();
       spCurrentRound++;
       setTimeout(() => spStartRound(), 3000);
@@ -181,14 +191,27 @@ function spEndGame() {
   clearInterval(spTimer);
   document.getElementById('timerContainer').style.display = 'none';
   document.getElementById('answerContainer').style.display = 'none';
-  let maxScore = 0;
-  spQuestions.forEach(q => q.answers.forEach(a => maxScore += a.score));
-  const pct = (spScore / maxScore) * 100;
-  let grade = pct >= 80 ? '🌟 LUAR BIASA!' : pct >= 60 ? '👏 HEBAT!' : pct >= 40 ? '👍 BAGUS!' : pct >= 20 ? '😊 LUMAYAN!' : '💪 COBA LAGI!';
-  document.getElementById('gameoverTitle').textContent = '🎮 Single Player Selesai!';
+
+  let grade = '';
+  let emoji = '';
+  if (spScore >= 500) { grade = 'AMPUN SUHU 🙇'; emoji = '🔥'; }
+  else if (spScore >= 400) { grade = 'JAGO JUGA LU 😎'; emoji = '⭐'; }
+  else if (spScore >= 300) { grade = 'GOKIL 🤩'; emoji = '🎯'; }
+  else if (spScore >= 200) { grade = 'B AJAH 😐'; emoji = '👌'; }
+  else if (spScore >= 100) { grade = 'KURENG 😅'; emoji = '😬'; }
+  else { grade = 'BODOH 💀'; emoji = '🤡'; }
+
+  document.getElementById('gameoverTitle').textContent = `${emoji} Single Player Selesai! ${emoji}`;
   document.getElementById('gameoverResult').innerHTML = `
     <p class="winner-name">${grade}</p>
-    <p class="final-score">Skor: ${spScore} / ${maxScore} (${Math.round(pct)}%)</p>
+    <p class="final-score">Total Skor: ${spScore}</p>
+    <p style="color:#888; margin-top:15px; font-size:0.9rem;">
+      Babak 1 (1x) + Babak 2 (2x) + Babak 3 (3x)
+    </p>
+    <p style="color:#666; margin-top:8px; font-size:0.85rem;">
+      0-100: Bodoh | 100-200: Kureng | 200-300: B Ajah<br>
+      300-400: Gokil | 400-500: Jago | 500+: Ampun Suhu
+    </p>
   `;
   showScreen('gameover');
 }
