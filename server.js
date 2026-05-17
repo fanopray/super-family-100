@@ -723,7 +723,270 @@ io.on('connection', (socket) => {
   });
 });
 
+// ==========================================
+// ABC 5 DASAR GAME
+// ==========================================
+const abcWords = require('./data/abc-words.json');
+const abcRooms = {};
+
+function genAbcCode() {
+  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += c[Math.floor(Math.random() * c.length)];
+  return code;
+}
+
+function numberToLetter(num) {
+  // 1=A, 2=B, ... 26=Z, 27=A, etc.
+  return String.fromCharCode(65 + ((num - 1) % 26));
+}
+
+function validateAbcAnswer(word, letter, category) {
+  const normalized = word.toLowerCase().trim();
+  if (!normalized.startsWith(letter.toLowerCase())) return false;
+  
+  // Check against database
+  const categoryWords = abcWords[category];
+  if (!categoryWords) return false;
+  const validWords = categoryWords[letter.toLowerCase()] || [];
+  
+  // Check if word is in database (fuzzy)
+  for (const w of validWords) {
+    if (w.toLowerCase() === normalized) return true;
+    if (normalized.includes(w.toLowerCase()) || w.toLowerCase().includes(normalized)) return true;
+    // Levenshtein for typos
+    if (normalized.length >= 3 && w.length >= 3) {
+      const dist = levenshtein(normalized, w.toLowerCase());
+      if (dist <= 1) return true;
+    }
+  }
+  
+  // Also accept if it starts with the letter and is at least 2 chars
+  // (lenient mode - accept anything starting with the letter that's reasonable)
+  if (normalized.length >= 2 && normalized.startsWith(letter.toLowerCase())) {
+    return true; // Accept all answers starting with correct letter (honor system with basic check)
+  }
+  
+  return false;
+}
+
+io.on('connection', (socket) => {
+  // ABC: Create room
+  socket.on('abc:create', () => {
+    let code = genAbcCode();
+    while (abcRooms[code]) code = genAbcCode();
+    
+    const player = { id: socket.id, name: `Player ${Object.keys(abcRooms).length + 1}` };
+    abcRooms[code] = {
+      code,
+      players: [player],
+      state: 'lobby',
+      scores: { [socket.id]: 0 },
+      categories: ['nama', 'kota', 'hewan', 'buah', 'benda'],
+      letterMethod: 'random',
+      currentRound: 0,
+      totalRounds: 5,
+      currentLetter: '',
+      currentCategory: '',
+      usedAnswers: [],
+      usedLetters: [],
+      timer: null,
+      readyPlayers: []
+    };
+    
+    socket.join(code);
+    socket.emit('abc:roomCreated', { code });
+    io.to(code).emit('abc:playerList', abcRooms[code].players);
+  });
+
+  // ABC: Join room
+  socket.on('abc:join', (code) => {
+    const room = abcRooms[code];
+    if (!room) return socket.emit('error', 'Room tidak ditemukan!');
+    if (room.players.length >= 5) return socket.emit('error', 'Room penuh (max 5)!');
+    if (room.state !== 'lobby') return socket.emit('error', 'Game sudah dimulai!');
+
+    const player = { id: socket.id, name: `Player ${room.players.length + 1}` };
+    room.players.push(player);
+    room.scores[socket.id] = 0;
+    socket.join(code);
+    socket.emit('abc:joined', { code });
+    io.to(code).emit('abc:playerList', room.players);
+  });
+
+  // ABC: Start game
+  socket.on('abc:startGame', ({ categories, letterMethod }) => {
+    // Find room where this socket is host
+    let room = null, code = null;
+    for (const c in abcRooms) {
+      if (abcRooms[c].players[0]?.id === socket.id) { room = abcRooms[c]; code = c; break; }
+    }
+    if (!room) return;
+    if (room.players.length < 1) return socket.emit('error', 'Minimal 1 pemain!');
+
+    room.categories = categories;
+    room.letterMethod = letterMethod;
+    room.currentRound = 0;
+    room.usedLetters = [];
+    
+    // Reset scores
+    room.players.forEach(p => room.scores[p.id] = 0);
+
+    io.to(code).emit('abc:gameStart');
+
+    if (letterMethod === 'number') {
+      io.to(code).emit('abc:requestNumber');
+    } else {
+      startAbcRound(code);
+    }
+  });
+
+  // ABC: Submit number for letter
+  socket.on('abc:submitNumber', ({ code, number }) => {
+    const room = abcRooms[code];
+    if (!room) return;
+    
+    const letter = numberToLetter(number);
+    room.currentLetter = letter;
+    startAbcRoundWithLetter(code, letter);
+  });
+
+  function startAbcRound(code) {
+    const room = abcRooms[code];
+    if (!room) return;
+    if (room.currentRound >= room.totalRounds) { endAbcGame(code); return; }
+
+    // Pick random letter (avoid used ones if possible)
+    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    let available = allLetters.filter(l => !room.usedLetters.includes(l));
+    if (available.length === 0) available = allLetters;
+    const letter = available[Math.floor(Math.random() * available.length)];
+    room.usedLetters.push(letter);
+    
+    startAbcRoundWithLetter(code, letter);
+  }
+
+  function startAbcRoundWithLetter(code, letter) {
+    const room = abcRooms[code];
+    if (!room) return;
+    if (room.currentRound >= room.totalRounds) { endAbcGame(code); return; }
+
+    room.currentLetter = letter;
+    room.currentCategory = room.categories[room.currentRound];
+    room.usedAnswers = [];
+    room.state = 'playing';
+
+    io.to(code).emit('abc:newRound', {
+      round: room.currentRound + 1,
+      totalRounds: room.totalRounds,
+      category: room.currentCategory,
+      letter: letter,
+      players: room.players,
+      scores: room.scores
+    });
+
+    // Start 60 second timer
+    io.to(code).emit('abc:timerStart', { duration: 60 });
+    
+    if (room.timer) clearTimeout(room.timer);
+    room.timer = setTimeout(() => {
+      room.state = 'roundEnd';
+      io.to(code).emit('abc:roundEnd', { players: room.players, scores: room.scores });
+      room.currentRound++;
+      
+      // Next round after 3 seconds
+      setTimeout(() => {
+        if (room.letterMethod === 'number' && room.currentRound < room.totalRounds) {
+          io.to(code).emit('abc:requestNumber');
+        } else {
+          startAbcRound(code);
+        }
+      }, 3000);
+    }, 60000);
+  }
+
+  // ABC: Answer
+  socket.on('abc:answer', ({ code, word }) => {
+    const room = abcRooms[code];
+    if (!room || room.state !== 'playing') return;
+    
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    const normalized = word.toLowerCase().trim();
+    
+    // Check not duplicate
+    if (room.usedAnswers.includes(normalized)) {
+      io.to(code).emit('abc:answerResult', {
+        playerName: player.name, word, valid: false, playerId: socket.id
+      });
+      return;
+    }
+
+    // Validate
+    const valid = validateAbcAnswer(word, room.currentLetter, room.currentCategory);
+    
+    if (valid) {
+      room.usedAnswers.push(normalized);
+      room.scores[socket.id] = (room.scores[socket.id] || 0) + 1;
+    }
+
+    io.to(code).emit('abc:answerResult', {
+      playerName: player.name, word, valid, playerId: socket.id
+    });
+
+    if (valid) {
+      io.to(code).emit('abc:scoreUpdate', { players: room.players, scores: room.scores });
+    }
+  });
+
+  // ABC: Play again
+  socket.on('abc:playAgain', (code) => {
+    const room = abcRooms[code];
+    if (!room) return;
+    room.state = 'lobby';
+    room.currentRound = 0;
+    room.players.forEach(p => room.scores[p.id] = 0);
+    io.to(code).emit('abc:restart');
+    io.to(code).emit('abc:playerList', room.players);
+  });
+
+  function endAbcGame(code) {
+    const room = abcRooms[code];
+    if (!room) return;
+    if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+    room.state = 'gameOver';
+
+    // Ranking
+    const ranking = room.players
+      .map(p => ({ id: p.id, name: p.name, score: room.scores[p.id] || 0 }))
+      .sort((a, b) => b.score - a.score);
+
+    io.to(code).emit('abc:gameOver', { players: room.players, scores: room.scores, ranking });
+  }
+
+  // ABC: Disconnect
+  socket.on('disconnect', () => {
+    for (const code in abcRooms) {
+      const room = abcRooms[code];
+      const idx = room.players.findIndex(p => p.id === socket.id);
+      if (idx !== -1) {
+        const name = room.players[idx].name;
+        room.players.splice(idx, 1);
+        if (room.players.length === 0) {
+          if (room.timer) clearTimeout(room.timer);
+          delete abcRooms[code];
+        } else {
+          io.to(code).emit('abc:playerDisconnected', { name });
+          io.to(code).emit('abc:playerList', room.players);
+        }
+        break;
+      }
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Super Family 100 running on port ${PORT}`);
+  console.log(`Game Server running on port ${PORT}`);
 });

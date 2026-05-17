@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ABC 5 Dasar - Multiplayer</title>
+  <link rel="stylesheet" href="abc-style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- HOME -->
+    <div id="screen-home" class="screen active">
+      <div class="container-center">
+        <h1 class="game-title">🔤 ABC 5 DASAR 🔤</h1>
+        <p class="subtitle">Sebutkan sebanyak-banyaknya!</p>
+        <button id="btnCreateAbc" class="btn btn-primary">Buat Room</button>
+        <div class="divider">atau</div>
+        <div class="join-group">
+          <input type="text" id="abcRoomCode" placeholder="Kode Room" maxlength="4">
+          <button id="btnJoinAbc" class="btn btn-secondary">Join</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div id="screen-lobby" class="screen">
+      <div class="container-center">
+        <h2>Room: <span id="lobbyCode">----</span></h2>
+        <div id="playerList" class="player-list"></div>
+        <p class="hint" id="lobbyHint">Menunggu pemain... (1-5 orang)</p>
+        <div id="hostControls" style="display:none;">
+          <h3>Pengaturan</h3>
+          <div class="form-group">
+            <label>Kategori (pilih 5):</label>
+            <div class="category-checkboxes" id="categoryCheckboxes">
+              <label><input type="checkbox" value="nama" checked> Nama</label>
+              <label><input type="checkbox" value="kota" checked> Kota</label>
+              <label><input type="checkbox" value="hewan" checked> Hewan</label>
+              <label><input type="checkbox" value="buah" checked> Buah</label>
+              <label><input type="checkbox" value="benda" checked> Benda</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Metode huruf:</label>
+            <select id="letterMethod">
+              <option value="random">Random dari sistem</option>
+              <option value="number">Input angka (1-100)</option>
+            </select>
+          </div>
+          <button id="btnStartGame" class="btn btn-primary">Mulai Game!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUMBER INPUT (for letter method) -->
+    <div id="screen-number" class="screen">
+      <div class="container-center">
+        <h2>Masukkan Angka (1-100)</h2>
+        <p class="subtitle">Angka akan dikonversi ke huruf</p>
+        <input type="number" id="numberInput" min="1" max="100" placeholder="1-100" class="number-input">
+        <button id="btnSubmitNumber" class="btn btn-primary">OK</button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="screen">
+      <div class="game-container">
+        <button id="btnMuteAbc" class="btn-mute" onclick="toggleMuteAbc()">🔊</button>
+
+        <!-- Scoreboard -->
+        <div class="scoreboard-abc" id="scoreboardAbc"></div>
+
+        <!-- Round Info -->
+        <div class="round-box">
+          <span id="abcRoundDisplay">Babak 1/5</span>
+          <span id="abcCategoryDisplay">Kategori: -</span>
+        </div>
+
+        <!-- Letter Display -->
+        <div class="letter-display">
+          <span class="letter-label">Huruf:</span>
+          <span class="letter-big" id="currentLetter">A</span>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer-container">
+          <div class="timer-bar"><div class="timer-fill" id="abcTimerFill"></div></div>
+          <span class="timer-text" id="abcTimerText">60</span>
+        </div>
+
+        <!-- Answers List -->
+        <div class="answers-scroll" id="answersScroll"></div>
+
+        <!-- Input -->
+        <div class="answer-input-container" id="abcAnswerContainer">
+          <input type="text" id="abcAnswerInput" placeholder="Ketik jawaban...">
+          <button id="btnAbcSubmit" class="btn btn-primary">Jawab!</button>
+        </div>
+
+        <!-- Status -->
+        <div class="game-status">
+          <p id="abcStatusText">Bersiap...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="screen-gameover" class="screen">
+      <div class="container-center">
+        <h1 id="abcGameoverTitle">🎉 Game Selesai!</h1>
+        <div id="abcGameoverResult"></div>
+        <button id="btnAbcPlayAgain" class="btn btn-primary">Main Lagi</button>
+        <button id="btnAbcHome" class="btn btn-back">Kembali</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="audio.js"></script>
+  <script src="abc-game.js"></script>
+</body>
+</html>
