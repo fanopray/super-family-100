@@ -9,13 +9,21 @@
       "adelaide",
       "abu dhabi",
       "alexandria",
-      "andir",
       "ambarawa",
       "atambua",
-      "argapura",
-      "astana",
       "ajibarang",
-      "arjawinangun"
+      "arjawinangun",
+      "astana",
+      "andir",
+      "adiwerna",
+      "amlapura",
+      "amurang",
+      "ampana",
+      "andoolo",
+      "anna",
+      "arga makmur",
+      "asahan",
+      "atang senjata"
     ],
     "b": [
       "bandung",
@@ -37,7 +45,22 @@
       "binjai",
       "banyuwangi",
       "banyumas",
-      "bangkalan"
+      "bangkalan",
+      "blora",
+      "batang",
+      "bantul",
+      "baubau",
+      "bengkulu",
+      "bima",
+      "bintan",
+      "bone",
+      "bulukumba",
+      "bumiayu",
+      "bangkinang",
+      "baturaja",
+      "baturaden",
+      "bitung",
+      "bondowoso"
     ],
     "c": [
       "cirebon",
@@ -54,7 +77,17 @@
       "cibubur",
       "ciawi",
       "cipanas",
-      "cikampek"
+      "cikampek",
+      "comal",
+      "curup",
+      "ciwidey",
+      "cicalengka",
+      "ciparay",
+      "cisarua",
+      "cikupa",
+      "ciomas",
+      "cibadak",
+      "cileungsi"
     ],
     "d": [
       "depok",
@@ -71,7 +104,16 @@
       "dresden",
       "dakar",
       "darwin",
-      "doha"
+      "doha",
+      "deli serdang",
+      "dharmasraya",
+      "dolok sanggul",
+      "donggala",
+      "driyorejo",
+      "dukuhturi",
+      "dumoga",
+      "duren sawit",
+      "duruka"
     ],
     "e": [
       "edinburgh",
@@ -83,7 +125,12 @@
       "essen",
       "exeter",
       "el paso",
-      "erie"
+      "erie",
+      "entikong",
+      "eretan",
+      "eromoko",
+      "embarkasi",
+      "elat"
     ],
     "f": [
       "florence",
@@ -95,7 +142,11 @@
       "fakfak",
       "fort worth",
       "fremantle",
-      "fairbanks"
+      "fairbanks",
+      "fak-fak",
+      "fatuleu",
+      "firdaus",
+      "fonuafo"
     ],
     "g": [
       "garut",
@@ -109,10 +160,20 @@
       "gunungkidul",
       "gianyar",
       "grobogan",
-      "gunung kidul",
       "grenada",
       "guadalajara",
-      "gdansk"
+      "gdansk",
+      "genteng",
+      "godean",
+      "gemolong",
+      "gambir",
+      "gondanglegi",
+      "gunung putri",
+      "gununghalu",
+      "galang",
+      "gadingrejo",
+      "gamping",
+      "gedangan"
     ],
     "h": [
       "hamburg",
@@ -123,25 +184,28 @@
       "hongkong",
       "halmahera",
       "humbahas",
-      "hulu sungai",
       "heidelberg",
       "hobart",
       "havana",
       "hyderabad",
-      "hungaria",
-      "harare"
+      "hulu sungai",
+      "humbang hasundutan",
+      "helvetia"
     ],
     "i": [
       "istanbul",
       "islamabad",
       "indramayu",
       "indragiri",
-      "ijen",
       "innsbruck",
       "indianapolis",
       "irkutsk",
       "izmir",
-      "iloilo"
+      "iloilo",
+      "ijen",
+      "indralaya",
+      "iring",
+      "itoman"
     ],
     "j": [
       "jakarta",
@@ -154,11 +218,21 @@
       "jayapura",
       "jambi",
       "jombang",
-      "jepang",
       "juneau",
       "jacksonville",
       "jinan",
-      "jimbaran"
+      "jimbaran",
+      "jatibarang",
+      "jatiwangi",
+      "jatinangor",
+      "jatiroto",
+      "jatisrono",
+      "jatilawang",
+      "jepang",
+      "jeneponto",
+      "jailolo",
+      "jantho",
+      "jetis"
     ],
     "k": [
       "kudus",
@@ -180,7 +254,20 @@
       "kisaran",
       "kalianda",
       "kroya",
-      "kutai"
+      "kutai",
+      "kajen",
+      "kartasura",
+      "kertosono",
+      "ketapang",
+      "kolaka",
+      "konawe",
+      "kota baru",
+      "kota bumi",
+      "kraksaan",
+      "kubu raya",
+      "kulon progo",
+      "kutacane",
+      "kutai barat"
     ],
     "l": [
       "lampung",
@@ -197,7 +284,17 @@
       "lubuklinggau",
       "lahat",
       "lawang",
-      "lembang"
+      "lembang",
+      "luwuk",
+      "liwa",
+      "limboto",
+      "lingga",
+      "long ikis",
+      "losarang",
+      "lubuk basung",
+      "lubuk pakam",
+      "luwu timur",
+      "luwu utara"
     ],
     "m": [
       "malang",
@@ -219,7 +316,17 @@
       "musi rawas",
       "muntilan",
       "mranggen",
-      "maros"
+      "maros",
+      "madura",
+      "mamuju",
+      "manggarai",
+      "martapura",
+      "merauke",
+      "mojosari",
+      "muara bungo",
+      "muara teweh",
+      "mungkid",
+      "mukomuko"
     ],
     "n": [
       "new york",
@@ -231,12 +338,18 @@
       "nabire",
       "nias",
       "natal",
-      "ngawi",
-      "nganjuk",
       "nuremberg",
       "nashville",
       "nantes",
-      "napoli"
+      "napoli",
+      "ngabang",
+      "ngamprah",
+      "ngasem",
+      "ngawi",
+      "ngemplak",
+      "ngoro",
+      "ngrambe",
+      "nusa tenggara"
     ],
     "o": [
       "osaka",
@@ -248,7 +361,11 @@
       "oku",
       "omaha",
       "okayama",
-      "oulu"
+      "oulu",
+      "ogan komering",
+      "ogan komering ulu",
+      "one",
+      "ondong siau"
     ],
     "p": [
       "palembang",
@@ -270,7 +387,22 @@
       "pamekasan",
       "pangkalpinang",
       "palangkaraya",
-      "palu"
+      "palu",
+      "pare",
+      "parigi",
+      "pariaman",
+      "payakumbuh",
+      "pekanbaru",
+      "pelabuhanratu",
+      "pematang siantar",
+      "pinrang",
+      "polewali",
+      "ponorogo",
+      "prambanan",
+      "pringsewu",
+      "purbalingga",
+      "purwodadi",
+      "purwakarta"
     ],
     "q": [
       "quezon",
@@ -299,7 +431,12 @@
       "rosario",
       "rangoon",
       "reykjavik",
-      "rennes"
+      "rennes",
+      "rantauprapat",
+      "rengat",
+      "riau",
+      "rokan hulu",
+      "rokan hilir"
     ],
     "s": [
       "surabaya",
@@ -322,11 +459,26 @@
       "sumbawa",
       "sampang",
       "slawi",
-      "sleman",
       "sukoharjo",
       "sumenep",
       "sangatta",
-      "sibolga"
+      "sibolga",
+      "siak",
+      "sijunjung",
+      "singkawang",
+      "sintang",
+      "solok",
+      "soppeng",
+      "soreang",
+      "srandakan",
+      "stabat",
+      "sukadana",
+      "sukanagara",
+      "sukaraja",
+      "sulawesi",
+      "sumba",
+      "sungailiat",
+      "supiori"
     ],
     "t": [
       "tangerang",
@@ -348,7 +500,22 @@
       "tehran",
       "turin",
       "toulouse",
-      "tallinn"
+      "tallinn",
+      "tabanan",
+      "takalar",
+      "tana toraja",
+      "tanah bumbu",
+      "tanah datar",
+      "tanah grogot",
+      "tapanuli",
+      "tarutung",
+      "tebo",
+      "teluk betung",
+      "tembilahan",
+      "tigaraksa",
+      "toli-toli",
+      "tomohon",
+      "toraja"
     ],
     "u": [
       "utrecht",
@@ -360,7 +527,11 @@
       "umea",
       "urbana",
       "ushuaia",
-      "ulm"
+      "ulm",
+      "ujung berung",
+      "ulu belu",
+      "undaan",
+      "unggaran"
     ],
     "v": [
       "venice",
@@ -389,7 +560,15 @@
       "windhoek",
       "wolfsburg",
       "waterloo",
-      "wollongong"
+      "wollongong",
+      "wakatobi",
+      "wajo",
+      "wangon",
+      "watampone",
+      "weleri",
+      "wiradesa",
+      "wonosari",
+      "wonoayu"
     ],
     "x": [
       "xiamen",
