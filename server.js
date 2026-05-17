@@ -937,18 +937,37 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
     if (!player) return;
 
-    const normalized = word.toLowerCase().trim();
+    let normalized = word.toLowerCase().trim();
+    const letter = room.currentLetter.toLowerCase();
     
-    // Check not duplicate
-    if (room.usedAnswers.includes(normalized)) {
+    // For animals: if multi-word like "burung elang" and letter is E, extract "elang"
+    // Find the word that starts with the correct letter
+    if (normalized.includes(' ')) {
+      const words = normalized.split(' ');
+      const matchingWord = words.find(w => w.startsWith(letter));
+      if (matchingWord) {
+        normalized = matchingWord;
+      }
+    }
+    
+    // Check not duplicate - check if the core word is already used
+    // Also check if any used answer contains this word or vice versa
+    const isDuplicate = room.usedAnswers.some(used => {
+      return used === normalized || 
+             used.includes(normalized) || 
+             normalized.includes(used);
+    });
+    
+    if (isDuplicate) {
       io.to(code).emit('abc:answerResult', {
-        playerName: player.name, word, valid: false, playerId: socket.id
+        playerName: player.name, word, valid: false, playerId: socket.id,
+        reason: 'Sudah disebut!'
       });
       return;
     }
 
-    // Validate
-    const valid = validateAbcAnswer(word, room.currentLetter, room.currentCategory);
+    // Validate against database
+    const valid = validateAbcAnswer(normalized, letter, room.currentCategory);
     
     if (valid) {
       room.usedAnswers.push(normalized);
@@ -956,7 +975,7 @@ io.on('connection', (socket) => {
     }
 
     io.to(code).emit('abc:answerResult', {
-      playerName: player.name, word, valid, playerId: socket.id
+      playerName: player.name, word: normalized, valid, playerId: socket.id
     });
 
     if (valid) {
