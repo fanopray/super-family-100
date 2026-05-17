@@ -131,14 +131,33 @@ document.getElementById('btnStartGame').addEventListener('click', () => {
 socket.on('abc:requestNumber', ({ round }) => {
   showScreen('number');
   document.getElementById('numberInput').value = '';
-  document.getElementById('numberHint').textContent = `Babak ${round} — siapa saja boleh input!`;
+  document.getElementById('numberHint').textContent = `Babak ${round} — semua pemain input angka, lalu dijumlahkan!`;
   document.getElementById('numberInput').focus();
+  document.getElementById('btnSubmitNumber').disabled = false;
+  document.getElementById('btnSubmitNumber').textContent = 'OK';
 });
 
 document.getElementById('btnSubmitNumber').addEventListener('click', () => {
   const num = parseInt(document.getElementById('numberInput').value);
   if (!num || num < 1 || num > 100) { showNotif('Masukkan angka 1-100!', 'error'); return; }
   socket.emit('abc:submitNumber', { code: roomCode, number: num });
+});
+
+socket.on('abc:numberSubmitted', () => {
+  document.getElementById('btnSubmitNumber').disabled = true;
+  document.getElementById('btnSubmitNumber').textContent = '✓ Terkirim';
+  document.getElementById('numberHint').textContent = '⏳ Mohon tunggu, pemain lain sedang menginput angka...';
+});
+
+socket.on('abc:numberProgress', ({ submitted, total }) => {
+  if (document.getElementById('btnSubmitNumber').disabled) {
+    document.getElementById('numberHint').textContent = `⏳ Menunggu pemain lain... (${submitted}/${total} sudah input)`;
+  }
+});
+
+socket.on('abc:numberResult', ({ sum, letter }) => {
+  document.getElementById('numberHint').textContent = `Total: ${sum} → Huruf: ${letter}`;
+  showNotif(`Jumlah: ${sum} → Huruf ${letter}!`, 'success');
 });
 
 document.getElementById('numberInput').addEventListener('keypress', e => {

@@ -745,26 +745,22 @@ function validateAbcAnswer(word, letter, category) {
   const normalized = word.toLowerCase().trim();
   if (!normalized.startsWith(letter.toLowerCase())) return false;
   
-  // Check against database
+  // Check against database ONLY
   const categoryWords = abcWords[category];
   if (!categoryWords) return false;
   const validWords = categoryWords[letter.toLowerCase()] || [];
   
-  // Check if word is in database (fuzzy)
+  // Strict check - must match database entry
   for (const w of validWords) {
-    if (w.toLowerCase() === normalized) return true;
-    if (normalized.includes(w.toLowerCase()) || w.toLowerCase().includes(normalized)) return true;
-    // Levenshtein for typos
+    const wLower = w.toLowerCase();
+    if (wLower === normalized) return true;
+    // Allow partial match only if input is substantial part of the word
+    if (normalized.length >= 3 && (wLower === normalized || wLower.startsWith(normalized) || normalized.startsWith(wLower))) return true;
+    // Levenshtein for typos (max 1 char difference)
     if (normalized.length >= 3 && w.length >= 3) {
-      const dist = levenshtein(normalized, w.toLowerCase());
+      const dist = levenshtein(normalized, wLower);
       if (dist <= 1) return true;
     }
-  }
-  
-  // Also accept if it starts with the letter and is at least 2 chars
-  // (lenient mode - accept anything starting with the letter that's reasonable)
-  if (normalized.length >= 2 && normalized.startsWith(letter.toLowerCase())) {
-    return true; // Accept all answers starting with correct letter (honor system with basic check)
   }
   
   return false;
@@ -849,14 +845,34 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ABC: Submit number for letter
+  // ABC: Submit number for letter - collect from all players then sum
   socket.on('abc:submitNumber', ({ code, number }) => {
     const room = abcRooms[code];
     if (!room) return;
     
-    const letter = numberToLetter(number);
-    room.currentLetter = letter;
-    startAbcRoundWithLetter(code, letter);
+    if (!room.numberInputs) room.numberInputs = {};
+    room.numberInputs[socket.id] = number;
+    
+    // Notify others this player has submitted
+    const submitted = Object.keys(room.numberInputs).length;
+    const total = room.players.length;
+    
+    socket.emit('abc:numberSubmitted');
+    io.to(code).emit('abc:numberProgress', { submitted, total });
+    
+    // All players submitted?
+    if (submitted >= total) {
+      // Sum all numbers
+      const sum = Object.values(room.numberInputs).reduce((a, b) => a + b, 0);
+      const letter = numberToLetter(sum);
+      room.numberInputs = {}; // Reset for next round
+      
+      io.to(code).emit('abc:numberResult', { sum, letter });
+      
+      setTimeout(() => {
+        startAbcRoundWithLetter(code, letter);
+      }, 2000);
+    }
   });
 
   function startAbcRound(code) {
