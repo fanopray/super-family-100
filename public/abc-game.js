@@ -3,7 +3,6 @@ const audioAbc = new AudioManager();
 
 const screens = {
   home: document.getElementById('screen-home'),
-  setup: document.getElementById('screen-setup'),
   lobby: document.getElementById('screen-lobby'),
   number: document.getElementById('screen-number'),
   game: document.getElementById('screen-game'),
@@ -60,25 +59,26 @@ document.getElementById('playerNameAbc').addEventListener('keypress', e => {
 });
 
 // ==========================================
-// SETUP (Host picks settings)
+// SETUP → now merged into lobby
 // ==========================================
 socket.on('abc:roomCreated', ({ code }) => {
   roomCode = code;
   isHost = true;
-  document.getElementById('setupCode').textContent = code;
-  showScreen('setup');
+  document.getElementById('lobbyCode').textContent = code;
+  document.getElementById('hostSettings').style.display = 'block';
+  document.getElementById('lobbyInfo').style.display = 'none';
+  document.getElementById('hostStartBtn').style.display = 'block';
+  document.getElementById('waitingMsg').style.display = 'none';
+  showScreen('lobby');
 });
 
-document.getElementById('btnGoToLobby').addEventListener('click', () => {
+// Start game (host) — reads settings from lobby
+document.getElementById('btnStartGame').addEventListener('click', () => {
   const selected = document.querySelector('input[name="category"]:checked');
   if (!selected) { showNotif('Pilih kategori!', 'error'); return; }
   const category = selected.value;
   const method = document.getElementById('letterMethod').value;
-  socket.emit('abc:setConfig', { code: roomCode, category, letterMethod: method });
-});
-
-socket.on('abc:configSet', () => {
-  showScreen('lobby');
+  socket.emit('abc:startGame', { code: roomCode, category, letterMethod: method });
 });
 
 // ==========================================
@@ -92,8 +92,6 @@ socket.on('abc:joined', ({ code }) => {
 
 socket.on('abc:lobbyUpdate', ({ code, players, category, letterMethod, hostId }) => {
   document.getElementById('lobbyCode').textContent = code;
-  document.getElementById('lobbyCategory').textContent = `Kategori: ${category.toUpperCase()}`;
-  document.getElementById('lobbyMethod').textContent = `Huruf: ${letterMethod === 'random' ? 'Random' : 'Input Angka'}`;
   document.getElementById('playerCount').textContent = `${players.length}/5 pemain`;
 
   const list = document.getElementById('playerList');
@@ -108,22 +106,23 @@ socket.on('abc:lobbyUpdate', ({ code, players, category, letterMethod, hostId })
     </div>`;
   });
 
-  // Show start button for host only
+  // Host sees settings, others see info
   if (myId === hostId) {
+    document.getElementById('hostSettings').style.display = 'block';
+    document.getElementById('lobbyInfo').style.display = 'none';
     document.getElementById('hostStartBtn').style.display = 'block';
     document.getElementById('waitingMsg').style.display = 'none';
   } else {
+    document.getElementById('hostSettings').style.display = 'none';
+    document.getElementById('lobbyInfo').style.display = 'flex';
+    document.getElementById('lobbyCategory').textContent = `Kategori: ${(category || '?').toUpperCase()}`;
+    document.getElementById('lobbyMethod').textContent = `Huruf: ${letterMethod === 'random' ? 'Random' : 'Input Angka'}`;
     document.getElementById('hostStartBtn').style.display = 'none';
     document.getElementById('waitingMsg').style.display = 'block';
   }
 });
 
 socket.on('error', msg => showNotif(msg, 'error'));
-
-// Start game (host)
-document.getElementById('btnStartGame').addEventListener('click', () => {
-  socket.emit('abc:startGame', roomCode);
-});
 
 // ==========================================
 // NUMBER INPUT

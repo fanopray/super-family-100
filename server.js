@@ -767,7 +767,7 @@ function validateAbcAnswer(word, letter, category) {
 }
 
 io.on('connection', (socket) => {
-  // ABC: Create room
+  // ABC: Create room → langsung ke lobby
   socket.on('abc:create', (playerName) => {
     let code = genAbcCode();
     while (abcRooms[code]) code = genAbcCode();
@@ -777,7 +777,7 @@ io.on('connection', (socket) => {
       code,
       players: [player],
       hostId: socket.id,
-      state: 'setup',
+      state: 'lobby',
       scores: { [socket.id]: 0 },
       category: 'negara',
       letterMethod: 'random',
@@ -792,19 +792,9 @@ io.on('connection', (socket) => {
     
     socket.join(code);
     socket.emit('abc:roomCreated', { code });
-  });
-
-  // ABC: Set config (host)
-  socket.on('abc:setConfig', ({ code, category, letterMethod }) => {
-    const room = abcRooms[code];
-    if (!room || room.hostId !== socket.id) return;
-    room.category = category;
-    room.letterMethod = letterMethod;
-    room.state = 'lobby';
-    socket.emit('abc:configSet');
     io.to(code).emit('abc:lobbyUpdate', {
-      code, players: room.players, category: room.category,
-      letterMethod: room.letterMethod, hostId: room.hostId
+      code, players: abcRooms[code].players, category: abcRooms[code].category,
+      letterMethod: abcRooms[code].letterMethod, hostId: socket.id
     });
   });
 
@@ -826,19 +816,21 @@ io.on('connection', (socket) => {
     });
   });
 
-  // ABC: Start game (host only)
-  socket.on('abc:startGame', (code) => {
+  // ABC: Start game (host only, settings from client)
+  socket.on('abc:startGame', ({ code, category, letterMethod }) => {
     const room = abcRooms[code];
     if (!room || room.hostId !== socket.id) return;
     if (room.players.length < 1) return socket.emit('error', 'Minimal 1 pemain!');
 
+    room.category = category;
+    room.letterMethod = letterMethod;
     room.currentRound = 0;
     room.usedLetters = [];
     room.players.forEach(p => room.scores[p.id] = 0);
 
     io.to(code).emit('abc:gameStart');
 
-    if (room.letterMethod === 'number') {
+    if (letterMethod === 'number') {
       io.to(code).emit('abc:requestNumber', { round: 1 });
     } else {
       startAbcRound(code);
