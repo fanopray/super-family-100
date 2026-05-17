@@ -772,15 +772,16 @@ function validateAbcAnswer(word, letter, category) {
 
 io.on('connection', (socket) => {
   // ABC: Create room
-  socket.on('abc:create', () => {
+  socket.on('abc:create', (playerName) => {
     let code = genAbcCode();
     while (abcRooms[code]) code = genAbcCode();
     
-    const player = { id: socket.id, name: `Player ${Object.keys(abcRooms).length + 1}` };
+    const player = { id: socket.id, name: playerName };
     abcRooms[code] = {
       code,
       players: [player],
-      state: 'lobby',
+      hostId: socket.id,
+      state: 'setup',
       scores: { [socket.id]: 0 },
       category: 'negara',
       letterMethod: 'random',
@@ -790,52 +791,59 @@ io.on('connection', (socket) => {
       currentCategory: '',
       usedAnswers: [],
       usedLetters: [],
-      timer: null,
-      readyPlayers: []
+      timer: null
     };
     
     socket.join(code);
     socket.emit('abc:roomCreated', { code });
-    io.to(code).emit('abc:playerList', abcRooms[code].players);
+  });
+
+  // ABC: Set config (host)
+  socket.on('abc:setConfig', ({ code, category, letterMethod }) => {
+    const room = abcRooms[code];
+    if (!room || room.hostId !== socket.id) return;
+    room.category = category;
+    room.letterMethod = letterMethod;
+    room.state = 'lobby';
+    socket.emit('abc:configSet');
+    io.to(code).emit('abc:lobbyUpdate', {
+      code, players: room.players, category: room.category,
+      letterMethod: room.letterMethod, hostId: room.hostId
+    });
   });
 
   // ABC: Join room
-  socket.on('abc:join', (code) => {
+  socket.on('abc:join', ({ code, name }) => {
     const room = abcRooms[code];
     if (!room) return socket.emit('error', 'Room tidak ditemukan!');
     if (room.players.length >= 5) return socket.emit('error', 'Room penuh (max 5)!');
     if (room.state !== 'lobby') return socket.emit('error', 'Game sudah dimulai!');
 
-    const player = { id: socket.id, name: `Player ${room.players.length + 1}` };
+    const player = { id: socket.id, name };
     room.players.push(player);
     room.scores[socket.id] = 0;
     socket.join(code);
     socket.emit('abc:joined', { code });
-    io.to(code).emit('abc:playerList', room.players);
+    io.to(code).emit('abc:lobbyUpdate', {
+      code, players: room.players, category: room.category,
+      letterMethod: room.letterMethod, hostId: room.hostId
+    });
   });
 
-  // ABC: Start game
-  socket.on('abc:startGame', ({ category, letterMethod }) => {
-    // Find room where this socket is host
-    let room = null, code = null;
-    for (const c in abcRooms) {
-      if (abcRooms[c].players[0]?.id === socket.id) { room = abcRooms[c]; code = c; break; }
-    }
-    if (!room) return;
+  // ABC: Start game (host only)
+  socket.on('abc:startGame', (code) => {
+    const room = abcRooms[code];
+    if (!room || room.hostId !== socket.id) return;
     if (room.players.length < 1) return socket.emit('error', 'Minimal 1 pemain!');
 
-    room.category = category;
-    room.letterMethod = letterMethod;
     room.currentRound = 0;
     room.usedLetters = [];
-    
-    // Reset scores
     room.players.forEach(p => room.scores[p.id] = 0);
 
     io.to(code).emit('abc:gameStart');
 
-    if (letterMethod === 'number') {
-      io.to(code).emit('abc:requestNumber');
+    if (room.letterMethod === 'number') {
+      io.to(code).emit('abc:requestNumber', { round: 1 });
     } else {
       startAbcRound(code);
     }
@@ -897,7 +905,7 @@ io.on('connection', (socket) => {
       // Next round after 3 seconds
       setTimeout(() => {
         if (room.letterMethod === 'number' && room.currentRound < room.totalRounds) {
-          io.to(code).emit('abc:requestNumber');
+          io.to(code).emit('abc:requestNumber', { round: room.currentRound + 1 });
         } else {
           startAbcRound(code);
         }
@@ -948,7 +956,10 @@ io.on('connection', (socket) => {
     room.currentRound = 0;
     room.players.forEach(p => room.scores[p.id] = 0);
     io.to(code).emit('abc:restart');
-    io.to(code).emit('abc:playerList', room.players);
+    io.to(code).emit('abc:lobbyUpdate', {
+      code, players: room.players, category: room.category,
+      letterMethod: room.letterMethod, hostId: room.hostId
+    });
   });
 
   function endAbcGame(code) {

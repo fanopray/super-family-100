@@ -13,51 +13,85 @@
       <div class="container-center">
         <h1 class="game-title">🔤 ABC 5 DASAR 🔤</h1>
         <p class="subtitle">Sebutkan sebanyak-banyaknya!</p>
+        
+        <div class="input-group">
+          <input type="text" id="playerNameAbc" placeholder="Masukkan nama kamu" maxlength="12">
+        </div>
+
         <button id="btnCreateAbc" class="btn btn-primary">Buat Room</button>
         <div class="divider">atau</div>
         <div class="join-group">
           <input type="text" id="abcRoomCode" placeholder="Kode Room" maxlength="4">
           <button id="btnJoinAbc" class="btn btn-secondary">Join</button>
         </div>
+        <a href="/" class="btn btn-back" style="display:inline-block;margin-top:15px;text-decoration:none;">← Kembali</a>
       </div>
     </div>
 
-    <!-- LOBBY -->
+    <!-- SETUP (Host only) -->
+    <div id="screen-setup" class="screen">
+      <div class="container-center">
+        <h2>⚙️ Pengaturan Game</h2>
+        <p class="subtitle">Room: <span id="setupCode">----</span></p>
+
+        <div class="form-group">
+          <label>Pilih Kategori:</label>
+          <div class="category-options" id="categoryOptions">
+            <label class="cat-option"><input type="radio" name="category" value="negara" checked><span>🌍 Negara</span></label>
+            <label class="cat-option"><input type="radio" name="category" value="kota"><span>🏙️ Kota</span></label>
+            <label class="cat-option"><input type="radio" name="category" value="hewan"><span>🐾 Hewan</span></label>
+            <label class="cat-option"><input type="radio" name="category" value="buah"><span>🍎 Buah</span></label>
+            <label class="cat-option"><input type="radio" name="category" value="benda"><span>📦 Benda</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Metode Huruf:</label>
+          <select id="letterMethod">
+            <option value="random">🎲 Random dari sistem</option>
+            <option value="number">🔢 Input angka (1-100)</option>
+          </select>
+        </div>
+
+        <button id="btnGoToLobby" class="btn btn-primary">Lanjut ke Lobby →</button>
+      </div>
+    </div>
+
+    <!-- LOBBY (Kumpulin pemain) -->
     <div id="screen-lobby" class="screen">
       <div class="container-center">
-        <h2>Room: <span id="lobbyCode">----</span></h2>
-        <div id="playerList" class="player-list"></div>
-        <p class="hint" id="lobbyHint">Menunggu pemain... (1-5 orang)</p>
-        <div id="hostControls" style="display:none;">
-          <h3>Pengaturan</h3>
-          <div class="form-group">
-            <label>Pilih 1 Kategori:</label>
-            <div class="category-checkboxes" id="categoryCheckboxes">
-              <label><input type="radio" name="category" value="negara" checked> Negara</label>
-              <label><input type="radio" name="category" value="kota"> Kota</label>
-              <label><input type="radio" name="category" value="hewan"> Hewan</label>
-              <label><input type="radio" name="category" value="buah"> Buah</label>
-              <label><input type="radio" name="category" value="benda"> Benda</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Metode huruf:</label>
-            <select id="letterMethod">
-              <option value="random">Random dari sistem</option>
-              <option value="number">Input angka (1-100)</option>
-            </select>
-          </div>
-          <button id="btnStartGame" class="btn btn-primary">Mulai Game!</button>
+        <h2>👥 Ruang Tunggu</h2>
+        <div class="room-code-box">
+          <p>Kode Room:</p>
+          <h1 id="lobbyCode">----</h1>
+          <p class="hint">Bagikan kode ini ke teman!</p>
+        </div>
+
+        <div class="lobby-info">
+          <span id="lobbyCategory">Kategori: -</span>
+          <span id="lobbyMethod">Metode: -</span>
+        </div>
+
+        <div class="player-list" id="playerList"></div>
+        <p class="player-count" id="playerCount">0/5 pemain</p>
+
+        <div id="hostStartBtn" style="display:none;">
+          <button id="btnStartGame" class="btn btn-primary btn-big">🚀 Mulai Game!</button>
+        </div>
+
+        <div id="waitingMsg" style="display:none;">
+          <p class="waiting-text">⏳ Menunggu host memulai game...</p>
         </div>
       </div>
     </div>
 
-    <!-- NUMBER INPUT (for letter method) -->
+    <!-- NUMBER INPUT -->
     <div id="screen-number" class="screen">
       <div class="container-center">
-        <h2>Masukkan Angka (1-100)</h2>
-        <p class="subtitle">Angka akan dikonversi ke huruf</p>
+        <h2>🔢 Masukkan Angka</h2>
+        <p class="subtitle">Angka 1-100 akan dikonversi ke huruf A-Z</p>
         <input type="number" id="numberInput" min="1" max="100" placeholder="1-100" class="number-input">
+        <p class="hint" id="numberHint"></p>
         <button id="btnSubmitNumber" class="btn btn-primary">OK</button>
       </div>
     </div>
@@ -109,8 +143,8 @@
       <div class="container-center">
         <h1 id="abcGameoverTitle">🎉 Game Selesai!</h1>
         <div id="abcGameoverResult"></div>
-        <button id="btnAbcPlayAgain" class="btn btn-primary">Main Lagi</button>
-        <button id="btnAbcHome" class="btn btn-back">Kembali</button>
+        <button id="btnAbcPlayAgain" class="btn btn-primary">🔄 Main Lagi</button>
+        <a href="/" class="btn btn-back" style="display:inline-block;margin-top:10px;text-decoration:none;">🏠 Menu Utama</a>
       </div>
     </div>
   </div>

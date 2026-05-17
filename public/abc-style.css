@@ -35,10 +35,28 @@ input:focus, select:focus { border-color: #00e5ff; }
 .join-group input { flex: 1; text-align: center; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 4px; }
 
 /* Lobby */
+.room-code-box { margin: 15px 0; }
+.room-code-box h1 { font-size: 3rem; color: #00e5ff; letter-spacing: 12px; margin: 8px 0; }
+.lobby-info { display: flex; justify-content: center; gap: 20px; margin: 12px 0; color: #aaa; font-size: 0.9rem; }
+
 .player-list { margin: 15px 0; }
-.player-item { padding: 10px 15px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); border-radius: 8px; margin: 5px 0; display: flex; justify-content: space-between; }
+.player-item { padding: 12px 15px; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); border-radius: 10px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+.player-item.me { border-color: #00e5ff; background: rgba(0,229,255,0.15); }
 .player-item .name { font-weight: bold; }
-.player-item .host-badge { color: #00e5ff; font-size: 0.8rem; }
+.player-item .host-badge { color: #ffd700; font-size: 0.8rem; }
+.player-item .you-badge { color: #00e5ff; font-size: 0.8rem; }
+.player-count { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
+.waiting-text { color: #888; font-style: italic; }
+.btn-big { padding: 16px 32px; font-size: 1.2rem; }
+
+.input-group { margin-bottom: 20px; }
+
+/* Setup */
+.category-options { display: flex; flex-direction: column; gap: 8px; }
+.cat-option { display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+.cat-option:hover { border-color: #00e5ff; }
+.cat-option input:checked + span { color: #00e5ff; }
+.cat-option span { font-size: 1rem; }
 
 .form-group { margin: 15px 0; text-align: left; }
 .form-group label { display: block; color: #aaa; margin-bottom: 5px; font-size: 0.9rem; }

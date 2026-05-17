@@ -3,6 +3,7 @@ const audioAbc = new AudioManager();
 
 const screens = {
   home: document.getElementById('screen-home'),
+  setup: document.getElementById('screen-setup'),
   lobby: document.getElementById('screen-lobby'),
   number: document.getElementById('screen-number'),
   game: document.getElementById('screen-game'),
@@ -10,6 +11,7 @@ const screens = {
 };
 
 let myId = null;
+let myName = '';
 let roomCode = '';
 let isHost = false;
 let abcTimer = null;
@@ -21,78 +23,115 @@ function showScreen(name) {
 
 function showNotif(msg, type = 'info') {
   const n = document.createElement('div');
-  n.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;font-weight:bold;z-index:1000;animation:slideD .3s ease;color:#fff;background:${type==='success'?'#38a169':type==='error'?'#c53030':'#357abd'}`;
+  n.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;font-weight:bold;z-index:1000;color:#fff;max-width:90%;text-align:center;background:${type==='success'?'#38a169':type==='error'?'#c53030':'#357abd'}`;
   n.textContent = msg;
   document.body.appendChild(n);
   setTimeout(() => n.remove(), 2500);
 }
 
 // ==========================================
-// HOME
+// HOME - Create / Join
 // ==========================================
 socket.on('connect', () => { myId = socket.id; });
 
 document.getElementById('btnCreateAbc').addEventListener('click', () => {
+  const name = document.getElementById('playerNameAbc').value.trim();
+  if (!name) { showNotif('Masukkan nama dulu!', 'error'); return; }
+  myName = name;
   audioAbc.init();
-  socket.emit('abc:create');
+  socket.emit('abc:create', name);
 });
 
 document.getElementById('btnJoinAbc').addEventListener('click', () => {
+  const name = document.getElementById('playerNameAbc').value.trim();
   const code = document.getElementById('abcRoomCode').value.trim().toUpperCase();
-  if (!code || code.length !== 4) { showNotif('Kode 4 karakter!', 'error'); return; }
+  if (!name) { showNotif('Masukkan nama dulu!', 'error'); return; }
+  if (!code || code.length !== 4) { showNotif('Kode room 4 karakter!', 'error'); return; }
+  myName = name;
   audioAbc.init();
-  socket.emit('abc:join', code);
+  socket.emit('abc:join', { code, name });
 });
 
 document.getElementById('abcRoomCode').addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('btnJoinAbc').click();
 });
+document.getElementById('playerNameAbc').addEventListener('keypress', e => {
+  if (e.key === 'Enter') document.getElementById('btnCreateAbc').click();
+});
 
 // ==========================================
-// LOBBY
+// SETUP (Host picks settings)
 // ==========================================
 socket.on('abc:roomCreated', ({ code }) => {
   roomCode = code;
   isHost = true;
-  document.getElementById('lobbyCode').textContent = code;
-  document.getElementById('hostControls').style.display = 'block';
+  document.getElementById('setupCode').textContent = code;
+  showScreen('setup');
+});
+
+document.getElementById('btnGoToLobby').addEventListener('click', () => {
+  const selected = document.querySelector('input[name="category"]:checked');
+  if (!selected) { showNotif('Pilih kategori!', 'error'); return; }
+  const category = selected.value;
+  const method = document.getElementById('letterMethod').value;
+  socket.emit('abc:setConfig', { code: roomCode, category, letterMethod: method });
+});
+
+socket.on('abc:configSet', () => {
   showScreen('lobby');
 });
 
+// ==========================================
+// LOBBY (Kumpulin pemain)
+// ==========================================
 socket.on('abc:joined', ({ code }) => {
   roomCode = code;
   isHost = false;
-  document.getElementById('lobbyCode').textContent = code;
-  document.getElementById('hostControls').style.display = 'none';
   showScreen('lobby');
 });
 
-socket.on('abc:playerList', (players) => {
+socket.on('abc:lobbyUpdate', ({ code, players, category, letterMethod, hostId }) => {
+  document.getElementById('lobbyCode').textContent = code;
+  document.getElementById('lobbyCategory').textContent = `Kategori: ${category.toUpperCase()}`;
+  document.getElementById('lobbyMethod').textContent = `Huruf: ${letterMethod === 'random' ? 'Random' : 'Input Angka'}`;
+  document.getElementById('playerCount').textContent = `${players.length}/5 pemain`;
+
   const list = document.getElementById('playerList');
   list.innerHTML = '';
-  players.forEach((p, i) => {
-    list.innerHTML += `<div class="player-item"><span class="name">${p.name}</span>${i===0?'<span class="host-badge">HOST</span>':''}</div>`;
+  players.forEach(p => {
+    const isMe = p.id === myId;
+    const isHostPlayer = p.id === hostId;
+    list.innerHTML += `<div class="player-item ${isMe ? 'me' : ''}">
+      <span class="name">${p.name}</span>
+      ${isHostPlayer ? '<span class="host-badge">👑 HOST</span>' : ''}
+      ${isMe ? '<span class="you-badge">← Kamu</span>' : ''}
+    </div>`;
   });
-  document.getElementById('lobbyHint').textContent = `${players.length}/5 pemain`;
+
+  // Show start button for host only
+  if (myId === hostId) {
+    document.getElementById('hostStartBtn').style.display = 'block';
+    document.getElementById('waitingMsg').style.display = 'none';
+  } else {
+    document.getElementById('hostStartBtn').style.display = 'none';
+    document.getElementById('waitingMsg').style.display = 'block';
+  }
 });
 
 socket.on('error', msg => showNotif(msg, 'error'));
 
-// Start game (host only)
+// Start game (host)
 document.getElementById('btnStartGame').addEventListener('click', () => {
-  const selected = document.querySelector('input[name="category"]:checked');
-  if (!selected) { showNotif('Pilih 1 kategori!', 'error'); return; }
-  const category = selected.value;
-  const method = document.getElementById('letterMethod').value;
-  socket.emit('abc:startGame', { category, letterMethod: method });
+  socket.emit('abc:startGame', roomCode);
 });
 
 // ==========================================
 // NUMBER INPUT
 // ==========================================
-socket.on('abc:requestNumber', () => {
+socket.on('abc:requestNumber', ({ round }) => {
   showScreen('number');
   document.getElementById('numberInput').value = '';
+  document.getElementById('numberHint').textContent = `Babak ${round} — siapa saja boleh input!`;
   document.getElementById('numberInput').focus();
 });
 
@@ -100,7 +139,6 @@ document.getElementById('btnSubmitNumber').addEventListener('click', () => {
   const num = parseInt(document.getElementById('numberInput').value);
   if (!num || num < 1 || num > 100) { showNotif('Masukkan angka 1-100!', 'error'); return; }
   socket.emit('abc:submitNumber', { code: roomCode, number: num });
-  showScreen('game');
 });
 
 document.getElementById('numberInput').addEventListener('keypress', e => {
@@ -116,6 +154,7 @@ socket.on('abc:gameStart', () => {
 });
 
 socket.on('abc:newRound', ({ round, totalRounds, category, letter, players, scores }) => {
+  showScreen('game');
   document.getElementById('abcRoundDisplay').textContent = `Babak ${round}/${totalRounds}`;
   document.getElementById('abcCategoryDisplay').textContent = `Kategori: ${category.toUpperCase()}`;
   document.getElementById('currentLetter').textContent = letter.toUpperCase();
@@ -123,11 +162,7 @@ socket.on('abc:newRound', ({ round, totalRounds, category, letter, players, scor
   document.getElementById('abcAnswerInput').value = '';
   document.getElementById('abcStatusText').textContent = '🎯 Sebutkan sebanyak-banyaknya!';
   document.getElementById('abcAnswerContainer').style.display = 'flex';
-
-  // Update scoreboard
   renderScoreboard(players, scores);
-
-  // Focus input
   setTimeout(() => document.getElementById('abcAnswerInput').focus(), 300);
 });
 
@@ -136,7 +171,6 @@ socket.on('abc:timerStart', ({ duration }) => {
   let timeLeft = duration;
   document.getElementById('abcTimerText').textContent = timeLeft;
   document.getElementById('abcTimerFill').style.width = '100%';
-
   abcTimer = setInterval(() => {
     timeLeft--;
     if (timeLeft < 0) { clearInterval(abcTimer); return; }
@@ -156,10 +190,9 @@ socket.on('abc:answerResult', ({ playerName, word, valid, playerId }) => {
   entry.innerHTML = `<span class="entry-word">${valid ? '✅' : '❌'} ${word}</span><span class="entry-player">${playerName}</span>`;
   scroll.appendChild(entry);
   scroll.scrollTop = scroll.scrollHeight;
-
   if (playerId === myId) {
-    if (valid) { audioAbc.playCorrect(); showNotif(`✅ ${word}`, 'success'); }
-    else { audioAbc.playWrong(); showNotif(`❌ ${word} - tidak valid!`, 'error'); }
+    if (valid) { audioAbc.playCorrect(); }
+    else { audioAbc.playWrong(); showNotif(`❌ Tidak valid / sudah disebut!`, 'error'); }
   }
   document.getElementById('abcAnswerInput').value = '';
   document.getElementById('abcAnswerInput').focus();
@@ -172,7 +205,7 @@ socket.on('abc:scoreUpdate', ({ players, scores }) => {
 socket.on('abc:roundEnd', ({ players, scores }) => {
   clearInterval(abcTimer);
   document.getElementById('abcAnswerContainer').style.display = 'none';
-  document.getElementById('abcStatusText').textContent = '⏰ Waktu habis! Babak selesai.';
+  document.getElementById('abcStatusText').textContent = '⏰ Waktu habis!';
   audioAbc.playRoundWin();
   renderScoreboard(players, scores);
 });
@@ -181,21 +214,19 @@ socket.on('abc:gameOver', ({ players, scores, ranking }) => {
   clearInterval(abcTimer);
   audioAbc.stopBGM();
   audioAbc.playGameOver();
-
   let html = '';
   ranking.forEach((r, i) => {
-    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     html += `<p class="podium ${cls}">${medal} ${r.name} — ${r.score} poin</p>`;
   });
-
   document.getElementById('abcGameoverTitle').textContent = ranking[0].id === myId ? '🎉 Kamu Menang! 🎉' : `🏆 ${ranking[0].name} Menang!`;
   document.getElementById('abcGameoverResult').innerHTML = html;
   showScreen('gameover');
 });
 
 socket.on('abc:playerDisconnected', ({ name }) => {
-  showNotif(`${name} keluar!`, 'error');
+  showNotif(`${name} keluar dari game`, 'error');
 });
 
 // ==========================================
@@ -217,13 +248,9 @@ document.getElementById('btnAbcPlayAgain').addEventListener('click', () => {
   socket.emit('abc:playAgain', roomCode);
 });
 
-document.getElementById('btnAbcHome').addEventListener('click', () => {
-  window.location.reload();
-});
-
 socket.on('abc:restart', () => {
   showScreen('lobby');
-  showNotif('Game di-reset! Host bisa mulai lagi.', 'info');
+  showNotif('Kembali ke lobby! Host bisa mulai lagi.', 'info');
 });
 
 // ==========================================
