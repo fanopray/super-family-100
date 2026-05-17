@@ -80,11 +80,11 @@ socket.on('error', msg => showNotif(msg, 'error'));
 
 // Start game (host only)
 document.getElementById('btnStartGame').addEventListener('click', () => {
-  const checkboxes = document.querySelectorAll('#categoryCheckboxes input:checked');
-  const categories = Array.from(checkboxes).map(c => c.value);
-  if (categories.length !== 5) { showNotif('Pilih tepat 5 kategori!', 'error'); return; }
+  const selected = document.querySelector('input[name="category"]:checked');
+  if (!selected) { showNotif('Pilih 1 kategori!', 'error'); return; }
+  const category = selected.value;
   const method = document.getElementById('letterMethod').value;
-  socket.emit('abc:startGame', { categories, letterMethod: method });
+  socket.emit('abc:startGame', { category, letterMethod: method });
 });
 
 // ==========================================

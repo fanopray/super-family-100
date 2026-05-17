@@ -782,7 +782,7 @@ io.on('connection', (socket) => {
       players: [player],
       state: 'lobby',
       scores: { [socket.id]: 0 },
-      categories: ['nama', 'kota', 'hewan', 'buah', 'benda'],
+      category: 'negara',
       letterMethod: 'random',
       currentRound: 0,
       totalRounds: 5,
@@ -815,7 +815,7 @@ io.on('connection', (socket) => {
   });
 
   // ABC: Start game
-  socket.on('abc:startGame', ({ categories, letterMethod }) => {
+  socket.on('abc:startGame', ({ category, letterMethod }) => {
     // Find room where this socket is host
     let room = null, code = null;
     for (const c in abcRooms) {
@@ -824,7 +824,7 @@ io.on('connection', (socket) => {
     if (!room) return;
     if (room.players.length < 1) return socket.emit('error', 'Minimal 1 pemain!');
 
-    room.categories = categories;
+    room.category = category;
     room.letterMethod = letterMethod;
     room.currentRound = 0;
     room.usedLetters = [];
@@ -872,7 +872,7 @@ io.on('connection', (socket) => {
     if (room.currentRound >= room.totalRounds) { endAbcGame(code); return; }
 
     room.currentLetter = letter;
-    room.currentCategory = room.categories[room.currentRound];
+    room.currentCategory = room.category; // Same category all rounds
     room.usedAnswers = [];
     room.state = 'playing';
 
