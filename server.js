@@ -745,22 +745,17 @@ function validateAbcAnswer(word, letter, category) {
   const normalized = word.toLowerCase().trim();
   if (!normalized.startsWith(letter.toLowerCase())) return false;
   
-  // Check against database ONLY
+  // Check against database - EXACT match only (no typo tolerance)
   const categoryWords = abcWords[category];
   if (!categoryWords) return false;
   const validWords = categoryWords[letter.toLowerCase()] || [];
   
-  // Strict check - must match database entry
   for (const w of validWords) {
     const wLower = w.toLowerCase();
     if (wLower === normalized) return true;
-    // Allow partial match only if input is substantial part of the word
+    // Allow if database entry starts with input or input starts with database entry
+    // e.g. "surabaya" matches "surabaya", "new york" matches "new york"
     if (normalized.length >= 3 && (wLower === normalized || wLower.startsWith(normalized) || normalized.startsWith(wLower))) return true;
-    // Levenshtein for typos (max 1 char difference)
-    if (normalized.length >= 3 && w.length >= 3) {
-      const dist = levenshtein(normalized, wLower);
-      if (dist <= 1) return true;
-    }
   }
   
   return false;

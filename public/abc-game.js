@@ -208,12 +208,14 @@ socket.on('abc:answerResult', ({ playerName, word, valid, playerId }) => {
   entry.innerHTML = `<span class="entry-word">${valid ? '✅' : '❌'} ${word}</span><span class="entry-player">${playerName}</span>`;
   scroll.appendChild(entry);
   scroll.scrollTop = scroll.scrollHeight;
+  
+  // Only clear input and play sound for the player who submitted
   if (playerId === myId) {
+    document.getElementById('abcAnswerInput').value = '';
+    document.getElementById('abcAnswerInput').focus();
     if (valid) { audioAbc.playCorrect(); }
     else { audioAbc.playWrong(); showNotif(`❌ Tidak valid / sudah disebut!`, 'error'); }
   }
-  document.getElementById('abcAnswerInput').value = '';
-  document.getElementById('abcAnswerInput').focus();
 });
 
 socket.on('abc:scoreUpdate', ({ players, scores }) => {
