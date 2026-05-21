@@ -745,17 +745,25 @@ function validateAbcAnswer(word, letter, category) {
   const normalized = word.toLowerCase().trim();
   if (!normalized.startsWith(letter.toLowerCase())) return false;
   
-  // Check against database - EXACT match only (no typo tolerance)
+  // Check against database
   const categoryWords = abcWords[category];
   if (!categoryWords) return false;
   const validWords = categoryWords[letter.toLowerCase()] || [];
   
+  // For artis: must be exact/full name match only
+  if (category === 'artis') {
+    for (const w of validWords) {
+      const wLower = w.toLowerCase();
+      if (wLower === normalized) return true;
+    }
+    return false;
+  }
+  
+  // For other categories: allow partial match
   for (const w of validWords) {
     const wLower = w.toLowerCase();
     if (wLower === normalized) return true;
-    // Allow if database entry starts with input or input starts with database entry
-    // e.g. "surabaya" matches "surabaya", "new york" matches "new york"
-    if (normalized.length >= 3 && (wLower === normalized || wLower.startsWith(normalized) || normalized.startsWith(wLower))) return true;
+    if (normalized.length >= 3 && (wLower.startsWith(normalized) || normalized.startsWith(wLower))) return true;
   }
   
   return false;
@@ -927,9 +935,9 @@ io.on('connection', (socket) => {
     let normalized = word.toLowerCase().trim();
     const letter = room.currentLetter.toLowerCase();
     
-    // For animals: if multi-word like "burung elang" and letter is E, extract "elang"
-    // Find the word that starts with the correct letter
-    if (normalized.includes(' ')) {
+    // For artis category: use full name, don't split
+    // For other categories: if multi-word like "burung elang" and letter is E, extract "elang"
+    if (room.currentCategory !== 'artis' && normalized.includes(' ')) {
       const words = normalized.split(' ');
       const matchingWord = words.find(w => w.startsWith(letter));
       if (matchingWord) {
@@ -937,9 +945,13 @@ io.on('connection', (socket) => {
       }
     }
     
-    // Check not duplicate - check if the core word is already used
-    // Also check if any used answer contains this word or vice versa
+    // Check not duplicate
     const isDuplicate = room.usedAnswers.some(used => {
+      if (room.currentCategory === 'artis') {
+        // For artis: exact match only
+        return used === normalized;
+      }
+      // For other categories: check if the core word is already used
       return used === normalized || 
              used.includes(normalized) || 
              normalized.includes(used);
