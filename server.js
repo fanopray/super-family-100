@@ -750,8 +750,8 @@ function validateAbcAnswer(word, letter, category) {
   if (!categoryWords) return false;
   const validWords = categoryWords[letter.toLowerCase()] || [];
   
-  // For artis: must be exact/full name match only
-  if (category === 'artis') {
+  // For artis & merk: must be exact/full name match only
+  if (category === 'artis' || category === 'merk') {
     for (const w of validWords) {
       const wLower = w.toLowerCase();
       if (wLower === normalized) return true;
@@ -936,9 +936,9 @@ io.on('connection', (socket) => {
     let normalized = word.toLowerCase().trim();
     const letter = room.currentLetter.toLowerCase();
     
-    // For artis category: use full name, don't split
+    // For artis & merk category: use full name, don't split
     // For other categories: if multi-word like "burung elang" and letter is E, extract "elang"
-    if (room.currentCategory !== 'artis' && normalized.includes(' ')) {
+    if (room.currentCategory !== 'artis' && room.currentCategory !== 'merk' && normalized.includes(' ')) {
       const words = normalized.split(' ');
       const matchingWord = words.find(w => w.startsWith(letter));
       if (matchingWord) {
@@ -948,8 +948,8 @@ io.on('connection', (socket) => {
     
     // Check not duplicate
     const isDuplicate = room.usedAnswers.some(used => {
-      if (room.currentCategory === 'artis') {
-        // For artis: exact match only
+      if (room.currentCategory === 'artis' || room.currentCategory === 'merk') {
+        // For artis & merk: exact match only
         return used === normalized;
       }
       // For other categories: check if the core word is already used
