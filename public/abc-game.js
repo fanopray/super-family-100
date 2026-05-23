@@ -180,6 +180,10 @@ socket.on('abc:newRound', ({ round, totalRounds, category, letter, players, scor
   document.getElementById('abcAnswerInput').value = '';
   document.getElementById('abcStatusText').textContent = '🎯 Sebutkan sebanyak-banyaknya!';
   document.getElementById('abcAnswerContainer').style.display = 'flex';
+  // Reset skip button
+  document.getElementById('btnAbcSkip').classList.remove('voted');
+  document.getElementById('btnAbcSkip').disabled = false;
+  document.getElementById('skipStatus').style.display = 'none';
   renderScoreboard(players, scores);
   setTimeout(() => document.getElementById('abcAnswerInput').focus(), 300);
 });
@@ -255,6 +259,26 @@ socket.on('abc:playerDisconnected', ({ name }) => {
 document.getElementById('btnAbcSubmit').addEventListener('click', submitAbcAnswer);
 document.getElementById('abcAnswerInput').addEventListener('keypress', e => {
   if (e.key === 'Enter') submitAbcAnswer();
+});
+
+// Skip button
+document.getElementById('btnAbcSkip').addEventListener('click', () => {
+  socket.emit('abc:skip', roomCode);
+  document.getElementById('btnAbcSkip').classList.add('voted');
+  document.getElementById('btnAbcSkip').disabled = true;
+});
+
+socket.on('abc:skipProgress', ({ voted, total }) => {
+  document.getElementById('skipStatus').style.display = 'block';
+  document.getElementById('skipStatusText').textContent = `⏭️ Skip vote: ${voted}/${total} pemain`;
+});
+
+socket.on('abc:skipRound', () => {
+  clearInterval(abcTimer);
+  document.getElementById('abcAnswerContainer').style.display = 'none';
+  document.getElementById('skipStatus').style.display = 'none';
+  document.getElementById('abcStatusText').textContent = '⏭️ Babak di-skip!';
+  showNotif('Semua pemain vote skip!', 'info');
 });
 
 function submitAbcAnswer() {

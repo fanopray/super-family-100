@@ -117,3 +117,12 @@ input:focus, select:focus { border-color: #00e5ff; }
   .scoreboard-abc { gap: 5px; }
   .score-chip { padding: 4px 10px; font-size: 0.8rem; }
 }
+
+/* Skip Button */
+.btn-skip { background: rgba(255,152,0,0.2); border: 1px solid #ff9800; color: #ff9800; padding: 12px 14px; border-radius: 10px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; min-width: 44px; }
+.btn-skip:hover { background: rgba(255,152,0,0.4); transform: translateY(-2px); }
+.btn-skip.voted { background: rgba(255,152,0,0.5); color: #fff; border-color: #ffa726; cursor: default; }
+.btn-skip:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+.skip-status { text-align: center; padding: 4px 8px; margin-bottom: 8px; }
+#skipStatusText { color: #ff9800; font-size: 0.85rem; }

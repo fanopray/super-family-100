@@ -893,6 +893,7 @@ io.on('connection', (socket) => {
     room.currentLetter = letter;
     room.currentCategory = room.category; // Same category all rounds
     room.usedAnswers = [];
+    room.skipVotes = new Set();
     room.state = 'playing';
 
     io.to(code).emit('abc:newRound', {
@@ -979,6 +980,39 @@ io.on('connection', (socket) => {
 
     if (valid) {
       io.to(code).emit('abc:scoreUpdate', { players: room.players, scores: room.scores });
+    }
+  });
+
+  // ABC: Skip vote
+  socket.on('abc:skip', (code) => {
+    const room = abcRooms[code];
+    if (!room || room.state !== 'playing') return;
+    
+    if (!room.skipVotes) room.skipVotes = new Set();
+    room.skipVotes.add(socket.id);
+    
+    const voted = room.skipVotes.size;
+    const total = room.players.length;
+    
+    io.to(code).emit('abc:skipProgress', { voted, total });
+    
+    // All players voted skip
+    if (voted >= total) {
+      room.skipVotes = new Set();
+      if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+      
+      io.to(code).emit('abc:skipRound');
+      io.to(code).emit('abc:roundEnd', { players: room.players, scores: room.scores });
+      
+      room.currentRound++;
+      
+      setTimeout(() => {
+        if (room.letterMethod === 'number' && room.currentRound < room.totalRounds) {
+          io.to(code).emit('abc:requestNumber', { round: room.currentRound + 1 });
+        } else {
+          startAbcRound(code);
+        }
+      }, 2000);
     }
   });
 
