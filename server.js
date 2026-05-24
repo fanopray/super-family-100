@@ -1065,6 +1065,96 @@ io.on('connection', (socket) => {
   });
 });
 
+// ==========================================
+// SPECTATOR MODE
+// ==========================================
+io.on('connection', (socket) => {
+  // List all active rooms
+  socket.on('spectate:listRooms', () => {
+    const familyRooms = Object.values(rooms).map(r => ({
+      code: r.code,
+      players: r.players,
+      state: r.state,
+      round: r.currentRound + 1,
+      totalRounds: r.totalRounds
+    }));
+    
+    const abcRoomsList = Object.values(abcRooms).map(r => ({
+      code: r.code,
+      players: r.players,
+      state: r.state,
+      category: r.currentCategory || r.category,
+      round: r.currentRound + 1,
+      totalRounds: r.totalRounds
+    }));
+    
+    socket.emit('spectate:roomList', { familyRooms, abcRooms: abcRoomsList });
+  });
+
+  // Leave spectating
+  socket.on('spectate:leave', (code) => {
+    socket.leave(code);
+  });
+
+  socket.on('spectate:join', ({ code, gameType }) => {
+    if (gameType === 'abc') {
+      const room = abcRooms[code];
+      if (!room) return socket.emit('spectate:error', 'Room ABC tidak ditemukan!');
+      
+      socket.join(code);
+      socket.emit('spectate:joined', { code, type: 'abc' });
+      
+      // Send current state if game is in progress
+      if (room.state === 'playing') {
+        socket.emit('abc:newRound', {
+          round: room.currentRound + 1,
+          totalRounds: room.totalRounds,
+          category: room.currentCategory || room.category,
+          letter: room.currentLetter || '-',
+          players: room.players,
+          scores: room.scores
+        });
+      }
+    } else {
+      const room = rooms[code];
+      if (!room) return socket.emit('spectate:error', 'Room Family 100 tidak ditemukan!');
+      
+      socket.join(code);
+      socket.emit('spectate:joined', { code, type: 'family' });
+      
+      // Send current state
+      const question = room.questions && room.questions[room.currentRound];
+      if (question) {
+        socket.emit('newRound', {
+          round: room.currentRound + 1,
+          totalRounds: room.totalRounds,
+          question: question.question,
+          answerCount: question.answers.length,
+          scores: room.scores,
+          multiplier: room.currentRound + 1
+        });
+        // Send already revealed answers
+        if (room.revealedAnswers) {
+          room.revealedAnswers.forEach(idx => {
+            socket.emit('correctAnswer', {
+              index: idx,
+              text: question.answers[idx].text,
+              score: question.answers[idx].score,
+              revealedAnswers: room.revealedAnswers,
+              roundScore: 0,
+              playerId: null
+            });
+          });
+        }
+        // Send strikes
+        if (room.strikes > 0) {
+          socket.emit('wrongAnswer', { strikes: room.strikes, playerId: null, answer: '' });
+        }
+      }
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Game Server running on port ${PORT}`);
