@@ -1159,3 +1159,69 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Game Server running on port ${PORT}`);
 });
+
+// ==========================================
+// OVERCOOKED GAME (WebSocket)
+// ==========================================
+const { WebSocketServer } = require('ws');
+const wss = new WebSocketServer({ server, path: '/overcooked-ws' });
+
+const OC_COLS = 12, OC_ROWS = 8, OC_TILE_SIZE = 64, OC_TICK_RATE = 20;
+const OC_TILE = { FLOOR:0,WALL:1,COUNTER:2,STOVE:3,INGREDIENT_TOMATO:4,INGREDIENT_LETTUCE:5,INGREDIENT_MEAT:6,CUTTING_BOARD:7,PLATE_STACK:8,SERVING:9,TRASH:10 };
+const OC_MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1],[1,4,5,6,2,2,2,8,2,7,7,1],[1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,3,3,3,2,10,2,2,9,9,9,1],[1,1,1,1,1,1,1,1,1,1,1,1]
+];
+const OC_RECIPES = {
+  'salad':{ingredients:['chopped_tomato','chopped_lettuce'],points:20},
+  'burger':{ingredients:['cooked_meat','chopped_lettuce','chopped_tomato'],points:40},
+  'soup':{ingredients:['chopped_tomato','chopped_tomato','cooked_meat'],points:35}
+};
+const OC_COLORS = ['#4fc3f7','#ff7043','#66bb6a','#ab47bc'];
+const OC_SPAWNS = [{x:3,y:3},{x:8,y:4},{x:3,y:4},{x:8,y:3}];
+const ocRooms = new Map();
+
+function ocGenCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<4;i++)code+=c[Math.floor(Math.random()*c.length)];return code;}
+function ocGetTile(gx,gy){if(gx<0||gx>=OC_COLS||gy<0||gy>=OC_ROWS)return 1;return OC_MAP[gy][gx];}
+function ocIsWalkable(gx,gy){return ocGetTile(gx,gy)===0;}
+function ocCanMove(x,y,half){const corners=[{x:x-half,y:y-half},{x:x+half,y:y-half},{x:x-half,y:y+half},{x:x+half,y:y+half}];for(const c of corners){if(!ocIsWalkable(Math.floor(c.x/OC_TILE_SIZE),Math.floor(c.y/OC_TILE_SIZE)))return false;}return true;}
+
+function ocCreateRoom(ws){let code=ocGenCode();while(ocRooms.has(code))code=ocGenCode();const room={code,players:[],worldItems:[],orders:[],score:0,timeLeft:120,gameRunning:false,orderTimer:0,nextOrderTime:5,tickInterval:null};ocRooms.set(code,room);return room;}
+
+function ocAddPlayer(room,ws){const i=room.players.length;const s=OC_SPAWNS[i%4];const p={id:i,ws,x:s.x*OC_TILE_SIZE+OC_TILE_SIZE/2,y:s.y*OC_TILE_SIZE+OC_TILE_SIZE/2,facing:{x:0,y:1},holding:null,color:OC_COLORS[i%4],input:{dx:0,dy:0,interact:false,drop:false},name:`Chef ${i+1}`};room.players.push(p);ws.ocIdx=i;ws.ocRoom=room.code;return p;}
+
+function ocRemovePlayer(room,ws){const idx=room.players.findIndex(p=>p.ws===ws);if(idx!==-1){room.players.splice(idx,1);room.players.forEach((p,i)=>{p.id=i;p.ws.ocIdx=i;});}if(room.players.length===0){if(room.tickInterval)clearInterval(room.tickInterval);ocRooms.delete(room.code);}else{ocBroadcastState(room);ocBroadcastLobby(room);}}
+
+function ocBroadcastLobby(room){const msg=JSON.stringify({type:'lobby',code:room.code,players:room.players.map(p=>({id:p.id,name:p.name,color:p.color})),gameRunning:room.gameRunning});for(const p of room.players)if(p.ws.readyState===1)p.ws.send(msg);}
+
+function ocBroadcastState(room){const msg=JSON.stringify({type:'state',players:room.players.map(p=>({id:p.id,x:p.x,y:p.y,facing:p.facing,holding:p.holding,color:p.color,name:p.name})),worldItems:room.worldItems.map(wi=>({gridX:wi.gridX,gridY:wi.gridY,item:wi.item,chopping:wi.chopping||false,chopTimer:wi.chopTimer||0,cooking:wi.cooking||false,cookTimer:wi.cookTimer||0,burning:wi.burning||false,burnTimer:wi.burnTimer||0})),orders:room.orders.map(o=>({recipe:o.recipe,timeLeft:o.timeLeft})),score:room.score,timeLeft:room.timeLeft,gameRunning:room.gameRunning});for(const p of room.players)if(p.ws.readyState===1)p.ws.send(msg);}
+
+function ocGetWorldItem(room,gx,gy){return room.worldItems.find(i=>i.gridX===gx&&i.gridY===gy);}
+function ocRemoveWorldItem(room,gx,gy){room.worldItems=room.worldItems.filter(i=>!(i.gridX===gx&&i.gridY===gy));}
+function ocGetFacing(player){const px=Math.floor(player.x/OC_TILE_SIZE),py=Math.floor(player.y/OC_TILE_SIZE);return{x:px+Math.round(player.facing.x),y:py+Math.round(player.facing.y)};}
+
+function ocInteract(room,player){const t=ocGetFacing(player);const tile=ocGetTile(t.x,t.y);const wi=ocGetWorldItem(room,t.x,t.y);if(!player.holding){if(tile===4){player.holding={type:'tomato'};return;}if(tile===5){player.holding={type:'lettuce'};return;}if(tile===6){player.holding={type:'meat'};return;}if(tile===8){player.holding={type:'plate',contents:[]};return;}if(wi){player.holding=wi.item;ocRemoveWorldItem(room,t.x,t.y);return;}}else{if(tile===10){player.holding=null;return;}if(tile===7&&!wi){const h=player.holding.type;if(h==='tomato'){player.holding=null;room.worldItems.push({gridX:t.x,gridY:t.y,item:{type:'chopped_tomato'},chopTimer:2,chopping:true});return;}if(h==='lettuce'){player.holding=null;room.worldItems.push({gridX:t.x,gridY:t.y,item:{type:'chopped_lettuce'},chopTimer:2,chopping:true});return;}}if(tile===3&&!wi){if(player.holding.type==='meat'){player.holding=null;room.worldItems.push({gridX:t.x,gridY:t.y,item:{type:'cooked_meat'},cookTimer:4,cooking:true});return;}}if(player.holding.type==='plate'&&wi){const it=wi.item.type;if((it.startsWith('chopped_')||it==='cooked_meat')&&!wi.chopping&&!wi.cooking){player.holding.contents.push(it);ocRemoveWorldItem(room,t.x,t.y);return;}}if(wi&&wi.item.type==='plate'){const h=player.holding.type;if(h.startsWith('chopped_')||h==='cooked_meat'){wi.item.contents.push(h);player.holding=null;return;}}if(tile===9&&player.holding.type==='plate'){if(ocTryServe(room,player.holding)){player.holding=null;return;}}if((tile===2||tile===7||tile===3)&&!wi){room.worldItems.push({gridX:t.x,gridY:t.y,item:player.holding});player.holding=null;return;}}}
+
+function ocTryServe(room,plate){const contents=[...plate.contents].sort();for(let i=0;i<room.orders.length;i++){const r=OC_RECIPES[room.orders[i].recipe];const needed=[...r.ingredients].sort();if(contents.length===needed.length&&contents.every((v,idx)=>v===needed[idx])){room.score+=r.points;room.orders.splice(i,1);return true;}}return false;}
+
+function ocSpawnOrder(room){const names=Object.keys(OC_RECIPES);room.orders.push({recipe:names[Math.floor(Math.random()*names.length)],timeLeft:45});}
+
+function ocTick(room){if(!room.gameRunning)return;const dt=1/OC_TICK_RATE;for(const p of room.players){let dx=p.input.dx,dy=p.input.dy;const len=Math.sqrt(dx*dx+dy*dy);if(len>0){dx/=len;dy/=len;p.facing.x=dx;p.facing.y=dy;}const speed=3;const half=OC_TILE_SIZE*0.6/2.5;const nx=p.x+dx*speed,ny=p.y+dy*speed;if(ocCanMove(nx,p.y,half))p.x=nx;if(ocCanMove(p.x,ny,half))p.y=ny;if(p.input.interact){ocInteract(room,p);p.input.interact=false;}if(p.input.drop){p.holding=null;p.input.drop=false;}}for(const wi of room.worldItems){if(wi.chopping&&wi.chopTimer>0){wi.chopTimer-=dt;if(wi.chopTimer<=0)wi.chopping=false;}if(wi.cooking&&wi.cookTimer>0){wi.cookTimer-=dt;if(wi.cookTimer<=0){wi.cooking=false;wi.burnTimer=6;wi.burning=true;}}if(wi.burning&&wi.burnTimer>0){wi.burnTimer-=dt;if(wi.burnTimer<=0){wi.item.type='burning_meat';wi.burning=false;}}}room.orderTimer+=dt;if(room.orderTimer>=room.nextOrderTime&&room.orders.length<4){ocSpawnOrder(room);room.orderTimer=0;room.nextOrderTime=8+Math.random()*7;}for(let i=room.orders.length-1;i>=0;i--){room.orders[i].timeLeft-=dt;if(room.orders[i].timeLeft<=0){room.orders.splice(i,1);room.score=Math.max(0,room.score-10);}}room.timeLeft-=dt;if(room.timeLeft<=0){room.timeLeft=0;room.gameRunning=false;clearInterval(room.tickInterval);room.tickInterval=null;ocBroadcastState(room);const msg=JSON.stringify({type:'gameOver',score:room.score});for(const p of room.players)if(p.ws.readyState===1)p.ws.send(msg);return;}ocBroadcastState(room);}
+
+function ocStartRoom(room){room.gameRunning=true;room.score=0;room.timeLeft=120;room.worldItems=[];room.orders=[];room.orderTimer=0;room.nextOrderTime=5;room.players.forEach((p,i)=>{const s=OC_SPAWNS[i%4];p.x=s.x*OC_TILE_SIZE+OC_TILE_SIZE/2;p.y=s.y*OC_TILE_SIZE+OC_TILE_SIZE/2;p.holding=null;p.facing={x:0,y:1};p.input={dx:0,dy:0,interact:false,drop:false};});ocSpawnOrder(room);room.tickInterval=setInterval(()=>ocTick(room),1000/OC_TICK_RATE);const msg=JSON.stringify({type:'gameStarted'});for(const p of room.players)if(p.ws.readyState===1)p.ws.send(msg);}
+
+wss.on('connection',(ws)=>{
+  ws.on('message',(data)=>{
+    let msg;try{msg=JSON.parse(data);}catch{return;}
+    switch(msg.type){
+      case 'createRoom':{const room=ocCreateRoom(ws);const p=ocAddPlayer(room,ws);ws.send(JSON.stringify({type:'roomCreated',code:room.code,playerId:p.id}));ocBroadcastLobby(room);break;}
+      case 'joinRoom':{const code=(msg.code||'').toUpperCase();const room=ocRooms.get(code);if(!room){ws.send(JSON.stringify({type:'error',message:'Room tidak ditemukan'}));return;}if(room.players.length>=4){ws.send(JSON.stringify({type:'error',message:'Room penuh (max 4)'}));return;}if(room.gameRunning){ws.send(JSON.stringify({type:'error',message:'Game sudah berjalan'}));return;}const p=ocAddPlayer(room,ws);ws.send(JSON.stringify({type:'roomJoined',code:room.code,playerId:p.id}));ocBroadcastLobby(room);break;}
+      case 'setName':{const room=ocRooms.get(ws.ocRoom);if(!room)return;const p=room.players[ws.ocIdx];if(p){p.name=(msg.name||'Chef').substring(0,12);ocBroadcastLobby(room);}break;}
+      case 'startGame':{const room=ocRooms.get(ws.ocRoom);if(!room||room.gameRunning)return;if(ws.ocIdx!==0)return;ocStartRoom(room);break;}
+      case 'input':{const room=ocRooms.get(ws.ocRoom);if(!room||!room.gameRunning)return;const p=room.players[ws.ocIdx];if(!p)return;p.input.dx=msg.dx||0;p.input.dy=msg.dy||0;if(msg.interact)p.input.interact=true;if(msg.drop)p.input.drop=true;break;}
+      case 'restart':{const room=ocRooms.get(ws.ocRoom);if(!room||ws.ocIdx!==0)return;ocStartRoom(room);break;}
+    }
+  });
+  ws.on('close',()=>{const room=ocRooms.get(ws.ocRoom);if(room)ocRemovePlayer(room,ws);});
+});
