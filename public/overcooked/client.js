@@ -359,31 +359,112 @@ function renderLoop() {
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     const scale = TILE_SIZE / 64;
 
-    // Draw tiles
+    // Draw tiles with better visuals
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             const tile = MAP[y][x];
-            ctx.fillStyle = TILE_COLORS[tile] || '#8B7355';
-            ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            const tx = x * TILE_SIZE;
+            const ty = y * TILE_SIZE;
+            const cx = tx + TILE_SIZE / 2;
+            const cy = ty + TILE_SIZE / 2;
 
-            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
-            const cx = x * TILE_SIZE + TILE_SIZE / 2;
-            const cy = y * TILE_SIZE + TILE_SIZE / 2;
-
-            if (tile === TILE.INGREDIENT_TOMATO) drawEmoji('🍅', cx, cy);
-            else if (tile === TILE.INGREDIENT_LETTUCE) drawEmoji('🥬', cx, cy);
-            else if (tile === TILE.INGREDIENT_MEAT) drawEmoji('🥩', cx, cy);
-            else if (tile === TILE.STOVE) drawEmoji('🔥', cx, cy);
-            else if (tile === TILE.CUTTING_BOARD) drawEmoji('🔪', cx, cy);
-            else if (tile === TILE.PLATE_STACK) drawEmoji('🍽️', cx, cy);
-            else if (tile === TILE.SERVING) drawEmoji('🏪', cx, cy);
-            else if (tile === TILE.TRASH) drawEmoji('🗑️', cx, cy);
+            // Base tile
+            if (tile === TILE.WALL) {
+                ctx.fillStyle = '#3d2b1f';
+                ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                ctx.fillStyle = '#4a3728';
+                ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                // Brick pattern
+                ctx.strokeStyle = '#2d1f15';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(tx + 4, ty + 4, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+                ctx.strokeRect(tx + TILE_SIZE / 2, ty + TILE_SIZE / 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+            } else if (tile === TILE.FLOOR) {
+                ctx.fillStyle = '#a08060';
+                ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                ctx.fillStyle = '#96775a';
+                ctx.fillRect(tx + 1, ty + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                // Wood grain
+                ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(tx, ty + TILE_SIZE * (i + 1) / 4);
+                    ctx.lineTo(tx + TILE_SIZE, ty + TILE_SIZE * (i + 1) / 4);
+                    ctx.stroke();
+                }
+            } else if (tile === TILE.COUNTER) {
+                drawCounter(tx, ty);
+            } else if (tile === TILE.STOVE) {
+                drawStove(tx, ty);
+            } else if (tile === TILE.INGREDIENT_TOMATO) {
+                drawCounter(tx, ty);
+                drawIngredientBox(cx, cy, '#e53935', '🍅');
+            } else if (tile === TILE.INGREDIENT_LETTUCE) {
+                drawCounter(tx, ty);
+                drawIngredientBox(cx, cy, '#43a047', '🥬');
+            } else if (tile === TILE.INGREDIENT_MEAT) {
+                drawCounter(tx, ty);
+                drawIngredientBox(cx, cy, '#8d6e63', '🥩');
+            } else if (tile === TILE.CUTTING_BOARD) {
+                drawCounter(tx, ty);
+                // Cutting board
+                ctx.fillStyle = '#d4a574';
+                const bw = TILE_SIZE * 0.6, bh = TILE_SIZE * 0.4;
+                ctx.fillRect(cx - bw/2, cy - bh/2, bw, bh);
+                ctx.strokeStyle = '#a0764a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(cx - bw/2, cy - bh/2, bw, bh);
+                // Knife
+                ctx.fillStyle = '#bbb';
+                ctx.fillRect(cx + bw/2 - 4, cy - bh/2 - 6, 3, 14);
+                ctx.fillStyle = '#5d4037';
+                ctx.fillRect(cx + bw/2 - 5, cy - bh/2 + 6, 5, 8);
+            } else if (tile === TILE.PLATE_STACK) {
+                drawCounter(tx, ty);
+                // Stack of plates
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillStyle = `rgba(255,255,255,${0.7 + i * 0.1})`;
+                    ctx.beginPath();
+                    ctx.ellipse(cx, cy - i * 3 + 4, TILE_SIZE * 0.25, TILE_SIZE * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#ccc';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            } else if (tile === TILE.SERVING) {
+                ctx.fillStyle = '#f9a825';
+                ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                ctx.fillStyle = '#f57f17';
+                ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                // Arrow up icon
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 8, cy + 2);
+                ctx.lineTo(cx + 8, cy + 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillRect(cx - 3, cy + 2, 6, 10);
+            } else if (tile === TILE.TRASH) {
+                drawCounter(tx, ty);
+                ctx.fillStyle = '#444';
+                const tw = TILE_SIZE * 0.4, th = TILE_SIZE * 0.5;
+                ctx.fillRect(cx - tw/2, cy - th/2 + 4, tw, th);
+                ctx.fillStyle = '#666';
+                ctx.fillRect(cx - tw/2 - 2, cy - th/2, tw + 4, 6);
+                // Lines on trash
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 1;
+                for (let i = 1; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - tw/2 + i * tw/3, cy - th/2 + 10);
+                    ctx.lineTo(cx - tw/2 + i * tw/3, cy + th/2);
+                    ctx.stroke();
+                }
+            }
         }
     }
 
@@ -393,84 +474,224 @@ function render() {
         const cy = wi.gridY * TILE_SIZE + TILE_SIZE / 2;
 
         if (wi.item.type === 'plate') {
-            drawEmoji('🍽️', cx, cy - TILE_SIZE * 0.15);
-            const contents = wi.item.contents || [];
-            for (let i = 0; i < contents.length; i++) {
-                const emoji = ITEM_EMOJI[contents[i]] || '?';
-                const smallSize = Math.max(8, TILE_SIZE * 0.2);
-                ctx.font = `${smallSize}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillText(emoji, cx + (i - contents.length / 2) * smallSize, cy + TILE_SIZE * 0.2);
-            }
+            drawPlate(cx, cy, wi.item.contents || []);
         } else {
-            const emoji = ITEM_EMOJI[wi.item.type] || '❓';
-            drawEmoji(emoji, cx, cy);
+            drawFoodItem(wi.item.type, cx, cy);
         }
 
         // Progress bars
         if (wi.chopping && wi.chopTimer > 0) {
-            drawProgressBar(cx, cy + TILE_SIZE * 0.35, 1 - wi.chopTimer / 2, '#44ff44');
+            drawProgressBar(cx, cy + TILE_SIZE * 0.38, 1 - wi.chopTimer / 2, '#4caf50', '#a5d6a7');
         }
         if (wi.cooking && wi.cookTimer > 0) {
-            drawProgressBar(cx, cy + TILE_SIZE * 0.35, 1 - wi.cookTimer / 4, '#ffaa00');
+            drawProgressBar(cx, cy + TILE_SIZE * 0.38, 1 - wi.cookTimer / 4, '#ff9800', '#ffe0b2');
         }
         if (wi.burning && wi.burnTimer > 0) {
-            drawProgressBar(cx, cy + TILE_SIZE * 0.35, 1 - wi.burnTimer / 6, '#ff0000');
+            drawProgressBar(cx, cy + TILE_SIZE * 0.38, 1 - wi.burnTimer / 6, '#f44336', '#ef9a9a');
         }
     }
 
-    // Draw players
-    for (const p of gameState.players) {
-        const px = p.x * scale;
-        const py = p.y * scale;
-        const size = TILE_SIZE * 0.6;
+    // Draw players (sorted by Y for depth)
+    const sortedPlayers = [...gameState.players].sort((a, b) => a.y - b.y);
+    for (const p of sortedPlayers) {
+        drawChef(p, scale);
+    }
+}
 
-        // Player circle
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(px, py, size / 2, 0, Math.PI * 2);
-        ctx.fill();
+function drawCounter(tx, ty) {
+    ctx.fillStyle = '#8d6e63';
+    ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+    ctx.fillStyle = '#a1887f';
+    ctx.fillRect(tx + 3, ty + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+    // Top surface highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(tx + 3, ty + 3, TILE_SIZE - 6, TILE_SIZE / 3);
+}
 
-        // Border (highlight self)
-        ctx.strokeStyle = p.id === myPlayerId ? '#ffd700' : '#fff';
-        ctx.lineWidth = p.id === myPlayerId ? 3 : 2;
-        ctx.stroke();
+function drawStove(tx, ty) {
+    ctx.fillStyle = '#424242';
+    ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+    ctx.fillStyle = '#616161';
+    ctx.fillRect(tx + 3, ty + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+    // Burner rings
+    const cx = tx + TILE_SIZE / 2, cy = ty + TILE_SIZE / 2;
+    ctx.strokeStyle = '#ff5722';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, TILE_SIZE * 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, TILE_SIZE * 0.12, 0, Math.PI * 2);
+    ctx.stroke();
+}
 
-        // Facing indicator
-        const indicatorDist = size / 2 + 4;
-        const ix = px + p.facing.x * indicatorDist;
-        const iy = py + p.facing.y * indicatorDist;
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(ix, iy, 3, 0, Math.PI * 2);
-        ctx.fill();
+function drawIngredientBox(cx, cy, color, emoji) {
+    ctx.fillStyle = color;
+    const s = TILE_SIZE * 0.45;
+    ctx.beginPath();
+    ctx.roundRect(cx - s/2, cy - s/2, s, s, 6);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Emoji on top
+    const fontSize = Math.max(14, TILE_SIZE * 0.35);
+    ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, cx, cy);
+}
 
-        // Name tag
-        ctx.font = `${Math.max(9, TILE_SIZE * 0.18)}px Arial`;
+function drawFoodItem(type, cx, cy) {
+    const size = TILE_SIZE * 0.35;
+    const emoji = ITEM_EMOJI[type] || '❓';
+    const fontSize = Math.max(14, TILE_SIZE * 0.38);
+    ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, cx, cy);
+    
+    // Chopped indicator
+    if (type.startsWith('chopped_')) {
+        ctx.fillStyle = '#4caf50';
+        ctx.font = `${Math.max(8, TILE_SIZE * 0.15)}px Arial`;
+        ctx.fillText('✓', cx + size * 0.7, cy - size * 0.5);
+    }
+}
+
+function drawPlate(cx, cy, contents) {
+    // Plate base
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, TILE_SIZE * 0.28, TILE_SIZE * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Contents on plate
+    if (contents.length > 0) {
+        const smallSize = Math.max(10, TILE_SIZE * 0.22);
+        ctx.font = `${smallSize}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillText(p.name, px, py + size / 2 + 12);
-        ctx.fillStyle = '#fff';
-        ctx.fillText(p.name, px - 1, py + size / 2 + 11);
+        ctx.textBaseline = 'middle';
+        for (let i = 0; i < contents.length; i++) {
+            const emoji = ITEM_EMOJI[contents[i]] || '?';
+            const offsetX = (i - (contents.length - 1) / 2) * smallSize * 0.7;
+            ctx.fillText(emoji, cx + offsetX, cy - 2);
+        }
+    }
+}
 
-        // Held item
-        if (p.holding) {
-            const hx = px;
-            const hy = py - size / 2 - 10;
-            if (p.holding.type === 'plate') {
-                drawEmoji('🍽️', hx, hy);
-                const contents = p.holding.contents || [];
+function drawChef(p, scale) {
+    const px = p.x * scale;
+    const py = p.y * scale;
+    const size = TILE_SIZE * 0.55;
+    const halfSize = size / 2;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(px, py + halfSize * 0.8, halfSize * 0.7, halfSize * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body (rounded rectangle)
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.roundRect(px - halfSize * 0.7, py - halfSize * 0.3, size * 0.7, size * 0.8, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Head
+    const headRadius = halfSize * 0.45;
+    const headY = py - halfSize * 0.5;
+    ctx.fillStyle = '#ffcc80'; // skin
+    ctx.beginPath();
+    ctx.arc(px, headY, headRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Chef hat
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.roundRect(px - headRadius * 0.9, headY - headRadius * 1.8, headRadius * 1.8, headRadius * 1.2, 4);
+    ctx.fill();
+    // Hat brim
+    ctx.fillRect(px - headRadius * 1.1, headY - headRadius * 0.7, headRadius * 2.2, headRadius * 0.35);
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px - headRadius * 1.1, headY - headRadius * 0.7, headRadius * 2.2, headRadius * 0.35);
+
+    // Eyes
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.arc(px - headRadius * 0.3, headY, 2, 0, Math.PI * 2);
+    ctx.arc(px + headRadius * 0.3, headY, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Facing indicator (small arrow)
+    const indicatorDist = halfSize + 6;
+    const ix = px + p.facing.x * indicatorDist;
+    const iy = py + p.facing.y * indicatorDist;
+    ctx.fillStyle = p.id === myPlayerId ? '#ffd700' : 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(ix, iy, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Highlight self
+    if (p.id === myPlayerId) {
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.arc(px, py, halfSize + 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // Name tag
+    ctx.font = `bold ${Math.max(9, TILE_SIZE * 0.17)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(px - ctx.measureText(p.name).width / 2 - 4, py + halfSize + 4, ctx.measureText(p.name).width + 8, 14);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(p.name, px, py + halfSize + 11);
+
+    // Held item (above head)
+    if (p.holding) {
+        const hx = px;
+        const hy = py - size * 0.9;
+        // Item bubble
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.arc(hx, hy, TILE_SIZE * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        if (p.holding.type === 'plate') {
+            const contents = p.holding.contents || [];
+            if (contents.length > 0) {
+                const smallSize = Math.max(8, TILE_SIZE * 0.16);
+                ctx.font = `${smallSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
                 for (let i = 0; i < contents.length; i++) {
                     const emoji = ITEM_EMOJI[contents[i]] || '?';
-                    const smallSize = Math.max(8, TILE_SIZE * 0.17);
-                    ctx.font = `${smallSize}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(emoji, hx + (i - contents.length / 2) * smallSize * 0.8, hy + 11);
+                    const offsetX = (i - (contents.length - 1) / 2) * smallSize * 0.6;
+                    ctx.fillText(emoji, hx + offsetX, hy);
                 }
             } else {
-                const emoji = ITEM_EMOJI[p.holding.type] || '❓';
-                drawEmoji(emoji, hx, hy);
+                drawEmoji('🍽️', hx, hy);
             }
+        } else {
+            const emoji = ITEM_EMOJI[p.holding.type] || '❓';
+            drawEmoji(emoji, hx, hy);
         }
     }
 }
@@ -483,13 +704,29 @@ function drawEmoji(emoji, x, y) {
     ctx.fillText(emoji, x, y);
 }
 
-function drawProgressBar(x, y, progress, color) {
+function drawProgressBar(x, y, progress, color, bgColor) {
     const w = TILE_SIZE * 0.7;
-    const h = 5;
+    const h = 6;
+    const radius = 3;
+    // Background
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(x - w / 2, y, w, h);
-    ctx.fillStyle = color;
-    ctx.fillRect(x - w / 2, y, w * Math.max(0, Math.min(1, progress)), h);
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2, y, w, h, radius);
+    ctx.fill();
+    // Fill
+    const fillW = w * Math.max(0, Math.min(1, progress));
+    if (fillW > 0) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(x - w / 2, y, fillW, h, radius);
+        ctx.fill();
+    }
+    // Border
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2, y, w, h, radius);
+    ctx.stroke();
 }
 
 function updateHUD() {
