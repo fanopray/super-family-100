@@ -140,6 +140,15 @@ function handleMessage(msg) {
             showGameOver(msg.score);
             break;
 
+        case 'paused':
+            document.getElementById('pause-screen').classList.remove('hidden');
+            break;
+
+        case 'resumed':
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('recipe-guide').classList.add('hidden');
+            break;
+
         case 'error':
             showError(msg.message);
             break;
@@ -186,6 +195,7 @@ function showGame() {
     showScreen(null);
     document.getElementById('ui-overlay').classList.remove('hidden');
     document.getElementById('orders-display').classList.remove('hidden');
+    document.getElementById('recipe-guide').classList.remove('hidden');
     if (window.innerWidth < 769) {
         document.getElementById('mobile-controls').classList.remove('hidden');
     }
@@ -731,7 +741,9 @@ function drawProgressBar(x, y, progress, color, bgColor) {
 
 function updateHUD() {
     document.getElementById('score-display').textContent = `⭐ ${gameState.score}`;
-    document.getElementById('timer-display').textContent = `⏱ ${Math.ceil(gameState.timeLeft)}`;
+    const mins = Math.floor(gameState.timeLeft / 60);
+    const secs = Math.ceil(gameState.timeLeft % 60);
+    document.getElementById('timer-display').textContent = `⏱ ${mins}:${secs.toString().padStart(2, '0')}`;
 
     const ordersEl = document.getElementById('orders-display');
     ordersEl.innerHTML = '';
@@ -786,6 +798,27 @@ document.getElementById('btn-back-lobby').addEventListener('click', () => {
     document.getElementById('ui-overlay').classList.add('hidden');
     document.getElementById('orders-display').classList.add('hidden');
     showLobby();
+});
+
+// Pause button
+document.getElementById('btn-pause').addEventListener('click', () => {
+    send({ type: 'pause' });
+});
+
+// Resume button
+document.getElementById('btn-resume').addEventListener('click', () => {
+    send({ type: 'resume' });
+});
+
+// Close recipe guide
+document.getElementById('btn-close-recipe').addEventListener('click', () => {
+    document.getElementById('recipe-guide').classList.add('hidden');
+});
+
+// Show recipe from pause
+document.getElementById('btn-show-recipe').addEventListener('click', () => {
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('recipe-guide').classList.remove('hidden');
 });
 
 // Handle URL room code (e.g., ?room=ABCD)

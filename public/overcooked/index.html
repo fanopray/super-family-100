@@ -11,9 +11,66 @@
         <!-- UI Overlay -->
         <div id="ui-overlay" class="hidden">
             <div id="score-display">⭐ 0</div>
-            <div id="timer-display">⏱ 120</div>
+            <button id="btn-pause" class="pause-btn">⏸️</button>
+            <div id="timer-display">⏱ 300</div>
         </div>
         <div id="orders-display" class="hidden"></div>
+
+        <!-- Recipe Guide (shown at start) -->
+        <div id="recipe-guide" class="hidden">
+            <div class="recipe-guide-content">
+                <h2>📋 Menu Resep</h2>
+                <div class="recipe-cards">
+                    <div class="recipe-card">
+                        <div class="recipe-icon">🥗</div>
+                        <div class="recipe-name">Salad</div>
+                        <div class="recipe-points">+20 poin</div>
+                        <div class="recipe-ingredients">
+                            <span class="ing">🍅 Tomat ✂️</span>
+                            <span class="ing-plus">+</span>
+                            <span class="ing">🥬 Selada ✂️</span>
+                        </div>
+                    </div>
+                    <div class="recipe-card">
+                        <div class="recipe-icon">🍲</div>
+                        <div class="recipe-name">Soup</div>
+                        <div class="recipe-points">+35 poin</div>
+                        <div class="recipe-ingredients">
+                            <span class="ing">🍅 Tomat ✂️</span>
+                            <span class="ing-plus">+</span>
+                            <span class="ing">🍅 Tomat ✂️</span>
+                            <span class="ing-plus">+</span>
+                            <span class="ing">🥩 Daging 🔥</span>
+                        </div>
+                    </div>
+                    <div class="recipe-card">
+                        <div class="recipe-icon">🍔</div>
+                        <div class="recipe-name">Burger</div>
+                        <div class="recipe-points">+40 poin</div>
+                        <div class="recipe-ingredients">
+                            <span class="ing">🥩 Daging 🔥</span>
+                            <span class="ing-plus">+</span>
+                            <span class="ing">🥬 Selada ✂️</span>
+                            <span class="ing-plus">+</span>
+                            <span class="ing">🍅 Tomat ✂️</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="recipe-hint">✂️ = Cincang di cutting board &nbsp; 🔥 = Masak di kompor</p>
+                <p class="recipe-hint">Taruh bahan jadi ke piring → antar ke serving (kuning)</p>
+                <button id="btn-close-recipe" class="menu-btn">👨‍🍳 Mulai Masak!</button>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="hidden">
+            <div class="pause-content">
+                <h2>⏸️ PAUSE</h2>
+                <p>Game dijeda</p>
+                <button id="btn-resume" class="menu-btn start-btn">▶️ Lanjut</button>
+                <button id="btn-show-recipe" class="menu-btn secondary">📋 Lihat Resep</button>
+            </div>
+        </div>
 
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>

@@ -374,3 +374,86 @@ input[type="text"]:focus {
     }
     h1 { font-size: 42px; }
 }
+
+/* Pause Button */
+.pause-btn {
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.pause-btn:hover { background: rgba(0,0,0,0.8); border-color: #fff; }
+
+/* Recipe Guide */
+#recipe-guide {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(26, 26, 46, 0.95);
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.recipe-guide-content {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+.recipe-guide-content h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #ffd700;
+}
+.recipe-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.recipe-card {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+}
+.recipe-icon { font-size: 36px; }
+.recipe-name { font-size: 18px; font-weight: bold; min-width: 60px; }
+.recipe-points { color: #ffd700; font-size: 14px; font-weight: bold; min-width: 70px; }
+.recipe-ingredients { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ing { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 13px; white-space: nowrap; }
+.ing-plus { color: #aaa; font-size: 14px; }
+.recipe-hint { color: #aaa; font-size: 13px; margin: 6px 0; }
+
+/* Pause Screen */
+#pause-screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(26, 26, 46, 0.92);
+    z-index: 140;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pause-content {
+    text-align: center;
+}
+.pause-content h2 { font-size: 42px; margin-bottom: 10px; }
+.pause-content p { color: #aaa; margin-bottom: 20px; }
+.pause-content .menu-btn { margin: 8px 0; display: block; width: 220px; margin-left: auto; margin-right: auto; }
+
+/* Responsive recipe */
+@media (max-width: 600px) {
+    .recipe-card { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 14px; }
+    .recipe-icon { font-size: 28px; }
+    .recipe-name { font-size: 15px; }
+    .recipe-guide-content h2 { font-size: 22px; }
+}
