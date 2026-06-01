@@ -457,3 +457,40 @@ input[type="text"]:focus {
     .recipe-name { font-size: 15px; }
     .recipe-guide-content h2 { font-size: 22px; }
 }
+
+/* Recipe Mini Guide (in-game) */
+#recipe-mini {
+    position: absolute;
+    top: 44px;
+    right: 8px;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.mini-recipe {
+    background: rgba(0,0,0,0.7);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #eee;
+    white-space: nowrap;
+}
+
+/* Fix pause button clickable */
+.pause-btn {
+    position: relative;
+    z-index: 15;
+    pointer-events: auto !important;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.pause-btn:hover { background: rgba(0,0,0,0.9); border-color: #fff; }
+.pause-btn:active { transform: scale(0.95); }

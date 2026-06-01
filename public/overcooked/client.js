@@ -72,7 +72,7 @@ const ITEM_EMOJI = {
     'plate': '🍽️', 'salad': '🥗', 'burger': '🍔', 'soup': '🍲',
 };
 
-const RECIPE_EMOJI = { 'salad': '🥗', 'burger': '🍔', 'soup': '🍲' };
+const RECIPE_EMOJI = { 'salad_simple': '🥗', 'salad': '🥗', 'burger': '🍔', 'soup': '🍲' };
 
 // ============================================
 // WEBSOCKET CONNECTION
@@ -195,6 +195,7 @@ function showGame() {
     showScreen(null);
     document.getElementById('ui-overlay').classList.remove('hidden');
     document.getElementById('orders-display').classList.remove('hidden');
+    document.getElementById('recipe-mini').classList.remove('hidden');
     document.getElementById('recipe-guide').classList.remove('hidden');
     if (window.innerWidth < 769) {
         document.getElementById('mobile-controls').classList.remove('hidden');
@@ -800,10 +801,7 @@ document.getElementById('btn-back-lobby').addEventListener('click', () => {
     showLobby();
 });
 
-// Pause button
-document.getElementById('btn-pause').addEventListener('click', () => {
-    send({ type: 'pause' });
-});
+// Pause button - handled via inline onclick in HTML
 
 // Resume button
 document.getElementById('btn-resume').addEventListener('click', () => {
