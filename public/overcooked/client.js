@@ -354,9 +354,7 @@ setInterval(() => {
 function renderLoop() {
     render();
     updateHUD();
-    if (gameState.gameRunning) {
-        requestAnimationFrame(renderLoop);
-    }
+    requestAnimationFrame(renderLoop);
 }
 
 function render() {
@@ -567,3 +565,4 @@ function checkUrlRoom() {
 // ============================================
 checkUrlRoom();
 connect();
+requestAnimationFrame(renderLoop);
